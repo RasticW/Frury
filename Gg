@@ -1,1021 +1,2794 @@
-{
-  "dns": {
-    "tag": "dns-inbound",
-    "servers": [
-      "https://8.8.8.8/dns-query",
-      "https://8.8.4.4/dns-query",
-      "https://1.1.1.1/dns-query",
-      "https://1.0.0.1/dns-query"
-    ],
-    "queryStrategy": "UseIPv4"
-  },
-  "log": {
-    "loglevel": "warning"
-  },
-  "stats": {},
-  "policy": {
-    "levels": {
-      "8": {
-        "connIdle": 300,
-        "handshake": 4,
-        "uplinkOnly": 1,
-        "downlinkOnly": 1
+[
+  {
+    "dns": {
+      "tag": "dns-inbound",
+      "servers": [
+        "https://8.8.8.8/dns-query",
+        "https://8.8.4.4/dns-query",
+        "https://1.1.1.1/dns-query",
+        "https://1.0.0.1/dns-query"
+      ],
+      "queryStrategy": "UseIPv4"
+    },
+    "log": {
+      "loglevel": "warning"
+    },
+    "stats": {},
+    "policy": {
+      "levels": {
+        "8": {
+          "connIdle": 300,
+          "handshake": 4,
+          "uplinkOnly": 1,
+          "downlinkOnly": 1
+        }
+      },
+      "system": {
+        "statsOutboundUplink": true,
+        "statsOutboundDownlink": true
       }
     },
-    "system": {
-      "statsOutboundUplink": true,
-      "statsOutboundDownlink": true
-    }
-  },
-  "routing": {
-    "rules": [
+    "routing": {
+      "rules": [
+        {
+          "port": 53,
+          "type": "field",
+          "outboundTag": "dns-out"
+        },
+        {
+          "type": "field",
+          "domain": ["geosite:TORRENT"],
+          "ruleTag": "TORRENT_BY_DOMAIN",
+          "outboundTag": "block"
+        },
+        {
+          "port": "6881-6889,51413,21413,17417,37305",
+          "type": "field",
+          "ruleTag": "TORRENT_BY_PORT",
+          "outboundTag": "block"
+        },
+        {
+          "type": "field",
+          "ruleTag": "TORRENT_BY_PROTOCOL",
+          "protocol": ["bittorrent"],
+          "outboundTag": "block"
+        },
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "ruleTag": "BACKUP_BALANCER",
+          "inboundTag": ["backup-routing"],
+          "balancerTag": "backup-balancer"
+        },
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "ruleTag": "PRIMARY_BALANCER",
+          "balancerTag": "primary-balancer"
+        }
+      ],
+      "balancers": [
+        {
+          "tag": "primary-balancer",
+          "selector": ["rw-proxy"],
+          "strategy": {
+            "type": "leastLoad",
+            "settings": {
+              "maxRTT": "2s",
+              "expected": 2,
+              "baselines": ["400ms", "800ms"],
+              "tolerance": 0.25
+            }
+          },
+          "fallbackTag": "backup-loopback"
+        },
+        {
+          "tag": "backup-balancer",
+          "selector": ["proxy-"],
+          "strategy": {
+            "type": "leastLoad",
+            "settings": {
+              "maxRTT": "3s",
+              "expected": 1,
+              "baselines": ["400ms", "800ms"],
+              "tolerance": 0.25
+            }
+          },
+          "fallbackTag": "block"
+        }
+      ],
+      "domainMatcher": "hybrid",
+      "domainStrategy": "IPIfNonMatch"
+    },
+    "inbounds": [
       {
-        "port": 53,
-        "type": "field",
-        "outboundTag": "dns-out"
+        "tag": "socks",
+        "port": 10808,
+        "listen": "127.0.0.1",
+        "protocol": "socks",
+        "settings": {
+          "udp": true,
+          "auth": "noauth",
+          "userLevel": 8
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": true,
+          "destOverride": ["http", "tls", "quic"]
+        }
       },
       {
-        "domain": ["geosite:TORRENT"],
-        "ruleTag": "TORRENT_BY_DOMAIN",
-        "outboundTag": "block"
-      },
-      {
-        "port": "6881-6889,51413,21413,17417,37305",
-        "type": "field",
-        "ruleTag": "TORRENT_BY_PORT",
-        "outboundTag": "block"
-      },
-      {
-        "type": "field",
-        "protocol": ["bittorrent"],
-        "ruleTag": "TORRENT_BY_PROTOCOL",
-        "outboundTag": "block"
-      },
-      {
-        "type": "field",
-        "network": "tcp,udp",
-        "balancerTag": "main-balancer"
+        "tag": "http",
+        "port": 10809,
+        "listen": "127.0.0.1",
+        "protocol": "http",
+        "settings": {
+          "userLevel": 8,
+          "allowTransparent": false
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": true,
+          "destOverride": ["http", "tls", "quic"]
+        }
       }
     ],
-    "balancers": [
+    "outbounds": [
       {
-        "tag": "main-balancer",
-        "selector": [
-          "rw-proxy", "rw-proxy-2", "rw-proxy-3", "rw-proxy-4", "rw-proxy-5", "rw-proxy-6",
-          "proxy-1", "proxy-2", "proxy-3", "proxy-4", "proxy-5", "proxy-6",
-          "proxy-7", "proxy-8", "proxy-9", "proxy-10", "proxy-11", "proxy-12",
-          "proxy-13", "proxy-14", "proxy-15", "proxy-16", "proxy-17", "proxy-18",
-          "proxy-19", "proxy-20", "proxy-21", "proxy-22", "proxy-23", "proxy-24",
-          "proxy-25", "proxy-26", "proxy-27", "proxy-28"
-        ],
-        "strategy": {
-          "type": "leastLoad",
-          "settings": {
-            "maxRTT": "3s",
-            "expected": 2,
-            "baselines": ["400ms", "800ms"],
-            "tolerance": 0.25
+        "tag": "rw-proxy",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "relay.oneoknews.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v1.StreamService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "relay.oneoknews.com",
+            "publicKey": "TwrXS2FIlRF5YYJlOYzcNp_ETPZ51lPAVM8xlZKFJR8",
+            "shortId": "742f07e91404a360",
+            "fingerprint": "firefox"
           }
+        }
+      },
+      {
+        "tag": "rw-proxy-2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "media.oneoknews.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
         },
-        "fallbackTag": "direct"
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v1.StreamService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "media.oneoknews.com",
+            "publicKey": "NDS3WjJ4wv4Ae9uiPVfD0E70dzm4qO-Z_jpS6T1yIWc",
+            "shortId": "4af991ec949bf535",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "rw-proxy-3",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "hub.oneoknews.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v1.StreamService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "hub.oneoknews.com",
+            "publicKey": "KJoHsAShwQt-FYE2OGEekwDbeeYe-S1A0YBU8W5uYGc",
+            "shortId": "064c2d37308aeeb6",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "rw-proxy-4",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "node.oneoknews.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v1.StreamService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "node.oneoknews.com",
+            "publicKey": "RENWrAwz22EeWlLwBeDVzhf0N9R21QejHJZoZJl7ogU",
+            "shortId": "6ff31ff99917c63c",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "rw-proxy-5",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "live.oneoknews.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v1.StreamService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "live.oneoknews.com",
+            "publicKey": "3k9tt4vfuAthlqxzaZds1JVQWVy4wcpN4OKtQBR0V1I",
+            "shortId": "d10fbb20c812c9e1",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "rw-proxy-6",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "cloud.oneoknews.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v1.StreamService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "cloud.oneoknews.com",
+            "publicKey": "3pNHfHK8ujcZEzPAlctfZHWCRZ0uCSuOK273-AL2_kg",
+            "shortId": "4d1d23dc01faa280",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-1",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-480b-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "46.243.142.242"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0019-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "46.243.142.242"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-3",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0009-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.120"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-4",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0012-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "46.8.209.148"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-5",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0006-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.166"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-6",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0019-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.242"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "smartcaptcha.yandexcloud.net",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-7",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-480b-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.153"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "smartcaptcha.yandexcloud.net",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-8",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-000c-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.158"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-9",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0012-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.187"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-10",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-001a-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.242"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-11",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-000a-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.130"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-12",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0007-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.161"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-13",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0006-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.190"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-14",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0009-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "78.159.250.105"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "player.mediavitrina.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-15",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0009-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.123"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-16",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-000e-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.189"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-17",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-001e-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.126"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-18",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-001e-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "176.109.88.80"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-19",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-000d-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.133"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-20",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0064-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "176.109.88.80"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-21",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0067-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.141"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-22",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0068-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "194.55.239.187"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-23",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0067-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "46.243.142.12"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-24",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0068-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "46.8.209.131"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-25",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0068-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "46.243.142.121"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-26",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0066-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "46.8.209.15"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-27",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 13443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-0064-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "178.248.238.2"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-28",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-480b-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "46.243.142.121"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "rutube.ru",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "proxy-29",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "port": 8443,
+              "users": [
+                {
+                  "id": "0a4548b8-3874-480b-88c6-47e8a582632c",
+                  "flow": "xtls-rprx-vision",
+                  "encryption": "none"
+                }
+              ],
+              "address": "46.8.209.129"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "shortId": "43dcff53849b81e6",
+            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+            "serverName": "smartcaptcha.yandexcloud.net",
+            "fingerprint": "qq"
+          }
+        }
+      },
+      {
+        "tag": "backup-loopback",
+        "protocol": "loopback",
+        "settings": {
+          "inboundTag": "backup-routing"
+        }
+      },
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {
+          "domainStrategy": "UseIP"
+        }
+      },
+      {
+        "tag": "block",
+        "protocol": "blackhole"
+      },
+      {
+        "tag": "dns-out",
+        "protocol": "dns"
       }
     ],
-    "domainMatcher": "hybrid",
-    "domainStrategy": "IPIfNonMatch"
+    "burstObservatory": {
+      "pingConfig": {
+        "timeout": "3s",
+        "interval": "1m",
+        "sampling": 2,
+        "destination": "http://connectivitycheck.gstatic.com/generate_204",
+        "connectivity": "http://connectivitycheck.gstatic.com/generate_204"
+      },
+      "subjectSelector": ["rw-proxy", "proxy-"]
+    },
+    "remarks": "🇪🇺 Европа - Мобильный"
   },
-  "inbounds": [
-    {
-      "tag": "socks",
-      "port": 10808,
-      "listen": "127.0.0.1",
-      "protocol": "socks",
-      "settings": {
-        "udp": true,
-        "auth": "noauth",
-        "userLevel": 8
+  {
+    "dns": {
+      "tag": "dns-inbound",
+      "servers": [
+        "https://8.8.8.8/dns-query",
+        "https://8.8.4.4/dns-query",
+        "https://1.1.1.1/dns-query",
+        "https://1.0.0.1/dns-query"
+      ],
+      "queryStrategy": "UseIPv4"
+    },
+    "log": {
+      "loglevel": "warning"
+    },
+    "stats": {},
+    "policy": {
+      "levels": {
+        "8": {
+          "connIdle": 300,
+          "handshake": 4,
+          "uplinkOnly": 1,
+          "downlinkOnly": 1
+        }
       },
-      "sniffing": {
-        "enabled": true,
-        "routeOnly": true,
-        "destOverride": ["http", "tls", "quic"]
+      "system": {
+        "statsOutboundUplink": true,
+        "statsOutboundDownlink": true
       }
     },
-    {
-      "tag": "http",
-      "port": 10809,
-      "listen": "127.0.0.1",
-      "protocol": "http",
-      "settings": {
-        "userLevel": 8,
-        "allowTransparent": false
-      },
-      "sniffing": {
-        "enabled": true,
-        "routeOnly": true,
-        "destOverride": ["http", "tls", "quic"]
-      }
-    }
-  ],
-  "outbounds": [
-    {
-      "tag": "rw-proxy",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "relay.oneoknews.com",
-          "port": 443,
-          "users": [{
-            "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
-            "encryption": "none",
-            "flow": ""
-          }]
-        }]
-      },
-      "streamSettings": {
-        "network": "grpc",
-        "grpcSettings": {
-          "serviceName": "api.v1.StreamService",
-          "mode": false
+    "routing": {
+      "rules": [
+        {
+          "port": 53,
+          "type": "field",
+          "outboundTag": "dns-out"
         },
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "relay.oneoknews.com",
-          "publicKey": "TwrXS2FIlRF5YYJlOYzcNp_ETPZ51lPAVM8xlZKFJR8",
-          "shortId": "742f07e91404a360",
-          "fingerprint": "firefox"
-        }
-      }
-    },
-    {
-      "tag": "rw-proxy-2",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "media.oneoknews.com",
-          "port": 443,
-          "users": [{
-            "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
-            "encryption": "none",
-            "flow": ""
-          }]
-        }]
-      },
-      "streamSettings": {
-        "network": "grpc",
-        "grpcSettings": {
-          "serviceName": "api.v1.StreamService",
-          "mode": false
+        {
+          "type": "field",
+          "domain": ["geosite:torrent"],
+          "outboundTag": "block"
         },
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "media.oneoknews.com",
-          "publicKey": "NDS3WjJ4wv4Ae9uiPVfD0E70dzm4qO-Z_jpS6T1yIWc",
-          "shortId": "4af991ec949bf535",
-          "fingerprint": "firefox"
-        }
-      }
-    },
-    {
-      "tag": "rw-proxy-3",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "hub.oneoknews.com",
-          "port": 443,
-          "users": [{
-            "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
-            "encryption": "none",
-            "flow": ""
-          }]
-        }]
-      },
-      "streamSettings": {
-        "network": "grpc",
-        "grpcSettings": {
-          "serviceName": "api.v1.StreamService",
-          "mode": false
+        {
+          "type": "field",
+          "domain": [
+            "geosite:google-play",
+            "geosite:github",
+            "geosite:twitch-ads",
+            "geosite:youtube",
+            "geosite:telegram"
+          ],
+          "balancerTag": "balancer"
         },
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "hub.oneoknews.com",
-          "publicKey": "KJoHsAShwQt-FYE2OGEekwDbeeYe-S1A0YBU8W5uYGc",
-          "shortId": "064c2d37308aeeb6",
-          "fingerprint": "firefox"
-        }
-      }
-    },
-    {
-      "tag": "rw-proxy-4",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "node.oneoknews.com",
-          "port": 443,
-          "users": [{
-            "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
-            "encryption": "none",
-            "flow": ""
-          }]
-        }]
-      },
-      "streamSettings": {
-        "network": "grpc",
-        "grpcSettings": {
-          "serviceName": "api.v1.StreamService",
-          "mode": false
+        {
+          "type": "field",
+          "domain": [
+            "geosite:private",
+            "geosite:category-ru",
+            "geosite:whitelist",
+            "geosite:microsoft",
+            "geosite:apple",
+            "geosite:epicgames",
+            "geosite:riot",
+            "geosite:escapefromtarkov",
+            "geosite:steam",
+            "geosite:twitch",
+            "geosite:pinterest",
+            "geosite:faceit"
+          ],
+          "outboundTag": "direct"
         },
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "node.oneoknews.com",
-          "publicKey": "RENWrAwz22EeWlLwBeDVzhf0N9R21QejHJZoZJl7ogU",
-          "shortId": "6ff31ff99917c63c",
-          "fingerprint": "firefox"
-        }
-      }
-    },
-    {
-      "tag": "rw-proxy-5",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "live.oneoknews.com",
-          "port": 443,
-          "users": [{
-            "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
-            "encryption": "none",
-            "flow": ""
-          }]
-        }]
-      },
-      "streamSettings": {
-        "network": "grpc",
-        "grpcSettings": {
-          "serviceName": "api.v1.StreamService",
-          "mode": false
+        {
+          "type": "field",
+          "protocol": ["bittorrent"],
+          "outboundTag": "block"
         },
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "live.oneoknews.com",
-          "publicKey": "3k9tt4vfuAthlqxzaZds1JVQWVy4wcpN4OKtQBR0V1I",
-          "shortId": "d10fbb20c812c9e1",
-          "fingerprint": "firefox"
-        }
-      }
-    },
-    {
-      "tag": "rw-proxy-6",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "cloud.oneoknews.com",
-          "port": 443,
-          "users": [{
-            "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
-            "encryption": "none",
-            "flow": ""
-          }]
-        }]
-      },
-      "streamSettings": {
-        "network": "grpc",
-        "grpcSettings": {
-          "serviceName": "api.v1.StreamService",
-          "mode": false
+        {
+          "ip": ["geoip:private", "geoip:direct"],
+          "type": "field",
+          "outboundTag": "direct"
         },
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "cloud.oneoknews.com",
-          "publicKey": "3pNHfHK8ujcZEzPAlctfZHWCRZ0uCSuOK273-AL2_kg",
-          "shortId": "4d1d23dc01faa280",
-          "fingerprint": "firefox"
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "balancerTag": "balancer"
         }
-      }
+      ],
+      "balancers": [
+        {
+          "tag": "balancer",
+          "selector": ["proxy"],
+          "strategy": {
+            "type": "leastLoad",
+            "settings": {
+              "maxRTT": "2s",
+              "expected": 2,
+              "baselines": ["400ms", "800ms"],
+              "tolerance": 0.25
+            }
+          }
+        }
+      ],
+      "domainMatcher": "hybrid",
+      "domainStrategy": "IPIfNonMatch"
     },
-    {
-      "tag": "proxy-1",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "46.243.142.242",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-4407-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
+    "inbounds": [
+      {
+        "tag": "socks",
+        "port": 10808,
+        "listen": "127.0.0.1",
+        "protocol": "socks",
+        "settings": {
+          "udp": true,
+          "auth": "noauth",
+          "userLevel": 8
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": true,
+          "destOverride": ["http", "tls", "quic"]
+        }
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "http",
+        "port": 10809,
+        "listen": "127.0.0.1",
+        "protocol": "http",
+        "settings": {
+          "userLevel": 8,
+          "allowTransparent": false
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": true,
+          "destOverride": ["http", "tls", "quic"]
         }
       }
-    },
-    {
-      "tag": "proxy-2",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "46.243.142.157",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0019-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
+    ],
+    "outbounds": [
+      {
+        "tag": "proxy",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it1.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it1.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it1.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
+        }
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it2.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it2.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it2.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-3",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.128",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0009-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-3",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it3.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it3.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it3.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-4",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "46.8.208.7",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0012-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-4",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it4.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it4.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it4.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-5",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.164",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0006-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-5",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it5.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it5.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it5.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-6",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.129",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0019-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "smartcaptcha.yandexcloud.net",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-6",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it6.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it6.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it6.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-7",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.123",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-4407-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "smartcaptcha.yandexcloud.net",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-7",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it7.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it7.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it7.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-8",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.128",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-000c-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-8",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it8.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it8.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it8.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-9",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.190",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0012-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-9",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it9.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it9.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it9.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-10",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.128",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-001a-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-10",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it10.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it10.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it10.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-11",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.163",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-000a-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-11",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it11.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it11.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it11.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-12",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.167",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0007-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-12",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it12.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it12.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it12.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-13",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.123",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0006-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-13",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it13.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it13.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it13.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-14",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "78.159.250.218",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0009-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "player.mediavitrina.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-14",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it14.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it14.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it14.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-15",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.153",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0009-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-15",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it15.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it15.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it15.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-16",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.129",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-000e-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-16",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it16.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it16.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it16.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-17",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.230",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-001e-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-17",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it17.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it17.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it17.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-18",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.230",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-000d-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-18",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it18.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it18.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it18.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-19",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.161",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0067-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "proxy-19",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "it19.tylersuper.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "grpc-api",
+            "authority": "it19.tylersuper.click",
+            "mode": false
+          },
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "it19.tylersuper.click",
+            "fingerprint": "firefox",
+            "alpn": ["h2"]
+          }
         }
-      }
-    },
-    {
-      "tag": "proxy-20",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "194.55.239.150",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0068-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {
+          "domainStrategy": "UseIP"
         }
-      }
-    },
-    {
-      "tag": "proxy-21",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "46.243.142.12",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0067-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
-        }
-      }
-    },
-    {
-      "tag": "proxy-22",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "46.8.209.226",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0068-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
+      {
+        "tag": "block",
+        "protocol": "blackhole"
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
-        }
+      {
+        "tag": "dns-out",
+        "protocol": "dns"
       }
-    },
-    {
-      "tag": "proxy-23",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "46.243.142.104",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0068-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
+    ],
+    "burstObservatory": {
+      "pingConfig": {
+        "timeout": "3s",
+        "interval": "1m",
+        "sampling": 2,
+        "destination": "http://connectivitycheck.gstatic.com/generate_204",
+        "connectivity": "http://connectivitycheck.gstatic.com/generate_204"
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
-        }
-      }
+      "subjectSelector": ["proxy"]
     },
-    {
-      "tag": "proxy-24",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "46.8.209.138",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0066-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
-      },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
-        }
-      }
-    },
-    {
-      "tag": "proxy-25",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "178.248.238.2",
-          "port": 13443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0064-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
-      },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
-        }
-      }
-    },
-    {
-      "tag": "proxy-26",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "46.243.142.12",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-4407-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
-      },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
-        }
-      }
-    },
-    {
-      "tag": "proxy-27",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "46.8.209.161",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-4407-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
-      },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "smartcaptcha.yandexcloud.net",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
-        }
-      }
-    },
-    {
-      "tag": "proxy-28",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [{
-          "address": "46.8.209.126",
-          "port": 8443,
-          "users": [{
-            "id": "e6ee0c3b-9870-0019-af38-12ca2aeb9105",
-            "encryption": "none",
-            "flow": "xtls-rprx-vision"
-          }]
-        }]
-      },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "rutube.ru",
-          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-          "shortId": "43dcff53849b81e6",
-          "fingerprint": "firefox"
-        }
-      }
-    },
-    {
-      "tag": "direct",
-      "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIP"
-      }
-    },
-    {
-      "tag": "block",
-      "protocol": "blackhole"
-    },
-    {
-      "tag": "dns-out",
-      "protocol": "dns"
-    }
-  ],
-  "burstObservatory": {
-    "pingConfig": {
-      "timeout": "3s",
-      "interval": "1m",
-      "sampling": 2,
-      "destination": "http://connectivitycheck.gstatic.com/generate_204",
-      "connectivity": "http://connectivitycheck.gstatic.com/generate_204"
-    },
-    "subjectSelector": ["rw-proxy", "proxy-"]
+    "remarks": "🇮🇹 Италия"
   },
-  "remarks": "🇪🇺 Авто-Выбор"
-}
+  {
+    "dns": {
+      "tag": "dns-inbound",
+      "servers": [
+        "https://8.8.8.8/dns-query",
+        "https://8.8.4.4/dns-query",
+        "https://1.1.1.1/dns-query",
+        "https://1.0.0.1/dns-query"
+      ],
+      "queryStrategy": "UseIPv4"
+    },
+    "log": {
+      "loglevel": "warning"
+    },
+    "stats": {},
+    "policy": {
+      "levels": {
+        "8": {
+          "connIdle": 300,
+          "handshake": 4,
+          "uplinkOnly": 1,
+          "downlinkOnly": 1
+        }
+      },
+      "system": {
+        "statsOutboundUplink": true,
+        "statsOutboundDownlink": true
+      }
+    },
+    "routing": {
+      "rules": [
+        {
+          "port": 53,
+          "type": "field",
+          "outboundTag": "dns-out"
+        },
+        {
+          "domain": ["geosite:TORRENT"],
+          "ruleTag": "TORRENT_BY_DOMAIN",
+          "outboundTag": "block"
+        },
+        {
+          "port": "6881-6889,51413,21413,17417,37305",
+          "ruleTag": "TORRENT_BY_PORT",
+          "outboundTag": "block"
+        },
+        {
+          "type": "field",
+          "domain": [
+            "geosite:google-play",
+            "geosite:github",
+            "geosite:twitch-ads",
+            "geosite:youtube",
+            "geosite:telegram"
+          ],
+          "balancerTag": "balancer"
+        },
+        {
+          "type": "field",
+          "domain": [
+            "geosite:private",
+            "geosite:category-ru",
+            "geosite:whitelist",
+            "geosite:microsoft",
+            "geosite:apple",
+            "geosite:epicgames",
+            "geosite:riot",
+            "geosite:escapefromtarkov",
+            "geosite:steam",
+            "geosite:twitch",
+            "geosite:pinterest",
+            "geosite:faceit"
+          ],
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "protocol": ["bittorrent"],
+          "outboundTag": "block"
+        },
+        {
+          "ip": ["geoip:private", "geoip:direct"],
+          "type": "field",
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "balancerTag": "balancer"
+        }
+      ],
+      "balancers": [
+        {
+          "tag": "balancer",
+          "selector": ["proxy"],
+          "strategy": {
+            "type": "leastLoad",
+            "settings": {
+              "maxRTT": "3s",
+              "expected": 1,
+              "baselines": ["400ms", "800ms"],
+              "tolerance": 0.25
+            }
+          },
+          "fallbackTag": "proxy"
+        }
+      ],
+      "domainMatcher": "hybrid",
+      "domainStrategy": "IPIfNonMatch"
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "port": 10808,
+        "listen": "127.0.0.1",
+        "protocol": "socks",
+        "settings": {
+          "udp": true,
+          "auth": "noauth",
+          "userLevel": 8
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": true,
+          "destOverride": ["http", "tls", "quic"]
+        }
+      },
+      {
+        "tag": "http",
+        "port": 10809,
+        "listen": "127.0.0.1",
+        "protocol": "http",
+        "settings": {
+          "userLevel": 8,
+          "allowTransparent": false
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": true,
+          "destOverride": ["http", "tls", "quic"]
+        }
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "proxy",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "images.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v2.ApiService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "images.onetimeok.com",
+            "publicKey": "CQhnOxCj9UuA67kiDGGOcXB1G_XayWfHyhmlWGeG4Uw",
+            "shortId": "cfb882e7dcf03ef2",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "api.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v2.ApiService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "api.onetimeok.com",
+            "publicKey": "CQhnOxCj9UuA67kiDGGOcXB1G_XayWfHyhmlWGeG4Uw",
+            "shortId": "cfb882e7dcf03ef2",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-3",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "get.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v2.ApiService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "get.onetimeok.com",
+            "publicKey": "CQhnOxCj9UuA67kiDGGOcXB1G_XayWfHyhmlWGeG4Uw",
+            "shortId": "cfb882e7dcf03ef2",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-4",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "content.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "app.v1.StreamService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "content.onetimeok.com",
+            "publicKey": "nhw3l7ERW8NoAh5lBv3dxkF-mkNYifxsSxX_HNiOhAU",
+            "shortId": "82674cbe556a1209",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-5",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "upload.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "app.v1.StreamService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "upload.onetimeok.com",
+            "publicKey": "nhw3l7ERW8NoAh5lBv3dxkF-mkNYifxsSxX_HNiOhAU",
+            "shortId": "82674cbe556a1209",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-6",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "feed.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "app.v1.StreamService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "feed.onetimeok.com",
+            "publicKey": "nhw3l7ERW8NoAh5lBv3dxkF-mkNYifxsSxX_HNiOhAU",
+            "shortId": "82674cbe556a1209",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-7",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "edge1.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "edge.v2.RelayService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "edge1.onetimeok.com",
+            "publicKey": "TLAYLGGk8xnADNCg4_7-E3YqlC8L4lVo4m7aauBL7kU",
+            "shortId": "ce7d5b58da528cf1",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-8",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "gateway.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "edge.v2.RelayService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "gateway.onetimeok.com",
+            "publicKey": "TLAYLGGk8xnADNCg4_7-E3YqlC8L4lVo4m7aauBL7kU",
+            "shortId": "ce7d5b58da528cf1",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-9",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "static.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "edge.v2.RelayService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "static.onetimeok.com",
+            "publicKey": "TLAYLGGk8xnADNCg4_7-E3YqlC8L4lVo4m7aauBL7kU",
+            "shortId": "ce7d5b58da528cf1",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-10",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "core.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "media.v1.ObjectService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "core.onetimeok.com",
+            "publicKey": "8QJSXd0F3JScfRiyQFh_IXYq8Liwpa9EzhbC1MDRrnc",
+            "shortId": "8e4d75390b1e0547",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-11",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "us.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "media.v1.ObjectService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "us.onetimeok.com",
+            "publicKey": "8QJSXd0F3JScfRiyQFh_IXYq8Liwpa9EzhbC1MDRrnc",
+            "shortId": "8e4d75390b1e0547",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-12",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "media.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "media.v1.ObjectService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "media.onetimeok.com",
+            "publicKey": "8QJSXd0F3JScfRiyQFh_IXYq8Liwpa9EzhbC1MDRrnc",
+            "shortId": "8e4d75390b1e0547",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-13",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "grid.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "gw.v1.MetricsService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "grid.onetimeok.com",
+            "publicKey": "28oR3ji9c2CneMNkbvcDL8WfvNWHS3GfA3RdtaF-pSg",
+            "shortId": "89e97b6542785ca6",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-14",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "assets.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "gw.v1.MetricsService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "assets.onetimeok.com",
+            "publicKey": "28oR3ji9c2CneMNkbvcDL8WfvNWHS3GfA3RdtaF-pSg",
+            "shortId": "89e97b6542785ca6",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-15",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "sync.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "gw.v1.MetricsService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "sync.onetimeok.com",
+            "publicKey": "28oR3ji9c2CneMNkbvcDL8WfvNWHS3GfA3RdtaF-pSg",
+            "shortId": "89e97b6542785ca6",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-16",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "dl.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v2.PushService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "dl.onetimeok.com",
+            "publicKey": "4o20JlNKKsAzSGEvEMw6g1A8Ij37tiSU1CFwTZI4b3o",
+            "shortId": "8ba32e7cefbf524a",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-17",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "stream.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v2.PushService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "stream.onetimeok.com",
+            "publicKey": "4o20JlNKKsAzSGEvEMw6g1A8Ij37tiSU1CFwTZI4b3o",
+            "shortId": "8ba32e7cefbf524a",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-18",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "hub.onetimeok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v2.PushService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "hub.onetimeok.com",
+            "publicKey": "4o20JlNKKsAzSGEvEMw6g1A8Ij37tiSU1CFwTZI4b3o",
+            "shortId": "8ba32e7cefbf524a",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {
+          "domainStrategy": "UseIP"
+        }
+      },
+      {
+        "tag": "block",
+        "protocol": "blackhole"
+      },
+      {
+        "tag": "dns-out",
+        "protocol": "dns"
+      }
+    ],
+    "burstObservatory": {
+      "pingConfig": {
+        "timeout": "5s",
+        "interval": "1m",
+        "sampling": 3,
+        "destination": "http://connectivitycheck.gstatic.com/generate_204",
+        "connectivity": "http://connectivitycheck.gstatic.com/generate_204"
+      },
+      "subjectSelector": ["proxy"]
+    },
+    "remarks": "🇳🇱 Нидерланды без рекламы"
+  }
+]
