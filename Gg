@@ -1,3 +1,5 @@
+#profile-title: RastyVpn
+#announce: ⭐️ - Без рекламы ⚡ - Быстрый
 [
   {
     "dns": {
@@ -2789,6 +2791,6 @@
       },
       "subjectSelector": ["proxy"]
     },
-    "remarks": "🇳🇱 Нидерланды без рекламы"
+    "remarks": "🇳🇱 Нидерланды ⚡"
   }
 ]
