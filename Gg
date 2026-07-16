@@ -1,5 +1,5 @@
 #profile-title: RastyVpn
-#announce: ⭐️ - Без рекламы ⚡ - Быстрый
+#announce: ⭐️ - Без рекламы ⚡ - быстрый
 [
   {
     "dns": {
@@ -2791,6 +2791,382 @@
       },
       "subjectSelector": ["proxy"]
     },
-    "remarks": "🇳🇱 Нидерланды ⚡"
+    "remarks": "🇳🇱 Нидерланды ⭐️"
+  },
+  {
+    "dns": {
+      "tag": "dns-inbound",
+      "servers": [
+        "https://8.8.8.8/dns-query",
+        "https://8.8.4.4/dns-query",
+        "https://1.1.1.1/dns-query",
+        "https://1.0.0.1/dns-query"
+      ],
+      "queryStrategy": "UseIPv4"
+    },
+    "log": {
+      "loglevel": "warning"
+    },
+    "stats": {},
+    "policy": {
+      "levels": {
+        "8": {
+          "connIdle": 300,
+          "handshake": 4,
+          "uplinkOnly": 1,
+          "downlinkOnly": 1
+        }
+      },
+      "system": {
+        "statsOutboundUplink": true,
+        "statsOutboundDownlink": true
+      }
+    },
+    "routing": {
+      "rules": [
+        {
+          "port": 53,
+          "type": "field",
+          "outboundTag": "dns-out"
+        },
+        {
+          "domain": ["geosite:TORRENT"],
+          "ruleTag": "TORRENT_BY_DOMAIN",
+          "outboundTag": "block"
+        },
+        {
+          "port": "6881-6889,51413,21413,17417,37305",
+          "ruleTag": "TORRENT_BY_PORT",
+          "outboundTag": "block"
+        },
+        {
+          "type": "field",
+          "domain": [
+            "geosite:google-play",
+            "geosite:github",
+            "geosite:twitch-ads",
+            "geosite:youtube",
+            "geosite:telegram"
+          ],
+          "balancerTag": "balancer"
+        },
+        {
+          "type": "field",
+          "domain": [
+            "geosite:private",
+            "geosite:category-ru",
+            "geosite:whitelist",
+            "geosite:microsoft",
+            "geosite:apple",
+            "geosite:epicgames",
+            "geosite:riot",
+            "geosite:escapefromtarkov",
+            "geosite:steam",
+            "geosite:twitch",
+            "geosite:pinterest",
+            "geosite:faceit"
+          ],
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "protocol": ["bittorrent"],
+          "outboundTag": "block"
+        },
+        {
+          "ip": ["geoip:private", "geoip:direct"],
+          "type": "field",
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "balancerTag": "balancer"
+        }
+      ],
+      "balancers": [
+        {
+          "tag": "balancer",
+          "selector": ["proxy"],
+          "strategy": {
+            "type": "leastLoad",
+            "settings": {
+              "maxRTT": "3s",
+              "expected": 1,
+              "baselines": ["400ms", "800ms"],
+              "tolerance": 0.25
+            }
+          },
+          "fallbackTag": "proxy"
+        }
+      ],
+      "domainMatcher": "hybrid",
+      "domainStrategy": "IPIfNonMatch"
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "port": 10808,
+        "listen": "127.0.0.1",
+        "protocol": "socks",
+        "settings": {
+          "udp": true,
+          "auth": "noauth",
+          "userLevel": 8
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": true,
+          "destOverride": ["http", "tls", "quic"]
+        }
+      },
+      {
+        "tag": "http",
+        "port": 10809,
+        "listen": "127.0.0.1",
+        "protocol": "http",
+        "settings": {
+          "userLevel": 8,
+          "allowTransparent": false
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": true,
+          "destOverride": ["http", "tls", "quic"]
+        }
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "proxy",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "fetch.anotherok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v1.StreamService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "fetch.anotherok.com",
+            "publicKey": "U7O4wCUNinuk5M-ADV1e4sJ_iA7-JVBEXB8nev6kzzs",
+            "shortId": "335555b164619360",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "gw.anotherok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v1.StreamService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "gw.anotherok.com",
+            "publicKey": "x8lIJGo3saqgH5QwS_rBw5f_CHIQ3VbHVZkVLO2xcH4",
+            "shortId": "df93428c96cebafa",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-3",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "stream.anotherok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v1.StreamService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "stream.anotherok.com",
+            "publicKey": "TqLNGC8a1HT1l2rg1_pX2ko8lFj5_t8OZLEDBEVX8xw",
+            "shortId": "e0369646e8811e51",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-4",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "dl.anotherok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v1.StreamService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "dl.anotherok.com",
+            "publicKey": "PmjXHw0htSG7YlunWln0LmVRHHp_5ME_6LcOsqH-Th0",
+            "shortId": "a2a9a58d0554ffe7",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-5",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "api.anotherok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v1.StreamService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "api.anotherok.com",
+            "publicKey": "2QQ2dRe9Rvl3LMGFHylFo9hsvVvAw8LddminmOb4oiM",
+            "shortId": "27c7b339e3cf49ee",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy-6",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "get.anotherok.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "serviceName": "api.v1.StreamService",
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "get.anotherok.com",
+            "publicKey": "7d0nA0uFERWHCdwLNNG8HgTAp63xjRlixsatQbKvVh4",
+            "shortId": "cb5d874c121b6b9a",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {
+          "domainStrategy": "UseIP"
+        }
+      },
+      {
+        "tag": "block",
+        "protocol": "blackhole"
+      },
+      {
+        "tag": "dns-out",
+        "protocol": "dns"
+      }
+    ],
+    "burstObservatory": {
+      "pingConfig": {
+        "timeout": "5s",
+        "interval": "1m",
+        "sampling": 3,
+        "destination": "http://connectivitycheck.gstatic.com/generate_204",
+        "connectivity": "http://connectivitycheck.gstatic.com/generate_204"
+      },
+      "subjectSelector": ["proxy"]
+    },
+    "remarks": "🇩🇪 Германия"
   }
 ]
