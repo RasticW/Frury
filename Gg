@@ -1,7 +1,4 @@
 vless://2d037902-fc43-4f6d-99ab-4a1ba154f947@fetch.anotherok.com:443?type=grpc&serviceName=api.v1.StreamService&security=reality&sni=fetch.anotherok.com&pbk=U7O4wCUNinuk5M-ADV1e4sJ_iA7-JVBEXB8nev6kzzs&sid=335555b164619360&fp=firefox&encryption=none#🇩🇪 Германия
-
 vless://2d037902-fc43-4f6d-99ab-4a1ba154f947@ingest.oneokgames.com:443?type=grpc&serviceName=api.v2.ObjectService&security=reality&sni=ingest.oneokgames.com&pbk=aDNsk312UNfOEh0RiyGZdK6opt__mMyKBSglqFKFP38&sid=dbdbeaf4aa6e1a5c&fp=firefox&encryption=none#🇳🇱 Нидерланды бeз рекламы ⚡️
-
 vless://2d037902-fc43-4f6d-99ab-4a1ba154f947@relay.oneoknews.com:443?type=grpc&serviceName=api.v1.StreamService&security=reality&sni=relay.oneoknews.com&pbk=TwrXS2FIlRF5YYJlOYzcNp_ETPZ51lPAVM8xlZKFJR8&sid=742f07e91404a360&fp=firefox&encryption=none#🇪🇺 ЕВРОПА ᴛᴦ ОБХОД №1
-
 vless://e0cd7096-0fb9-419f-bdf6-1ccb7281c11d@46.243.142.242:8443?type=tcp&security=reality&sni=rutube.ru&pbk=10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc&sid=43dcff53849b81e6&fp=firefox&flow=xtls-rprx-vision&encryption=none#🇪🇺 ЕВРОПА ᴛᴦ ОБХОД №2
