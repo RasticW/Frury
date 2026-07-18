@@ -1,6 +1,4 @@
 #profile-update-interval: 3
-#announce: Обновление 18.07.2026
-
 [
   {
     "dns": {
