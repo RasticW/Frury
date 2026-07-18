@@ -1,3 +1,8 @@
+#profile-update-interval: 3
+#profile-title: RastyVPN
+#support-url: https://t.me/RastyVpn
+#announce: Обновление 18.07.2026
+
 [
   {
     "dns": {
@@ -37,7 +42,9 @@
         },
         {
           "type": "field",
-          "domain": ["geosite:TORRENT"],
+          "domain": [
+            "geosite:TORRENT"
+          ],
           "ruleTag": "TORRENT_BY_DOMAIN",
           "outboundTag": "block"
         },
@@ -50,14 +57,18 @@
         {
           "type": "field",
           "ruleTag": "TORRENT_BY_PROTOCOL",
-          "protocol": ["bittorrent"],
+          "protocol": [
+            "bittorrent"
+          ],
           "outboundTag": "block"
         },
         {
           "type": "field",
           "network": "tcp,udp",
           "ruleTag": "BACKUP_BALANCER",
-          "inboundTag": ["backup-routing"],
+          "inboundTag": [
+            "backup-routing"
+          ],
           "balancerTag": "backup-balancer"
         },
         {
@@ -70,13 +81,18 @@
       "balancers": [
         {
           "tag": "primary-balancer",
-          "selector": ["rw-proxy"],
+          "selector": [
+            "rw-proxy"
+          ],
           "strategy": {
             "type": "leastLoad",
             "settings": {
               "maxRTT": "2s",
               "expected": 2,
-              "baselines": ["400ms", "800ms"],
+              "baselines": [
+                "400ms",
+                "800ms"
+              ],
               "tolerance": 0.25
             }
           },
@@ -84,13 +100,18 @@
         },
         {
           "tag": "backup-balancer",
-          "selector": ["proxy-"],
+          "selector": [
+            "proxy-"
+          ],
           "strategy": {
             "type": "leastLoad",
             "settings": {
               "maxRTT": "3s",
               "expected": 1,
-              "baselines": ["400ms", "800ms"],
+              "baselines": [
+                "400ms",
+                "800ms"
+              ],
               "tolerance": 0.25
             }
           },
@@ -114,7 +135,11 @@
         "sniffing": {
           "enabled": true,
           "routeOnly": true,
-          "destOverride": ["http", "tls", "quic"]
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       },
       {
@@ -129,7 +154,11 @@
         "sniffing": {
           "enabled": true,
           "routeOnly": true,
-          "destOverride": ["http", "tls", "quic"]
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       }
     ],
@@ -1210,9 +1239,12 @@
         "destination": "http://connectivitycheck.gstatic.com/generate_204",
         "connectivity": "http://connectivitycheck.gstatic.com/generate_204"
       },
-      "subjectSelector": ["rw-proxy", "proxy-"]
+      "subjectSelector": [
+        "rw-proxy",
+        "proxy-"
+      ]
     },
-    "remarks": "🇪🇺 Европа - Мобильный"
+    "remarks": "🇪🇺 Европа 1 ⚡"
   },
   {
     "dns": {
@@ -1252,7 +1284,9 @@
         },
         {
           "type": "field",
-          "domain": ["geosite:torrent"],
+          "domain": [
+            "geosite:torrent"
+          ],
           "outboundTag": "block"
         },
         {
@@ -1286,11 +1320,16 @@
         },
         {
           "type": "field",
-          "protocol": ["bittorrent"],
+          "protocol": [
+            "bittorrent"
+          ],
           "outboundTag": "block"
         },
         {
-          "ip": ["geoip:private", "geoip:direct"],
+          "ip": [
+            "geoip:private",
+            "geoip:direct"
+          ],
           "type": "field",
           "outboundTag": "direct"
         },
@@ -1303,13 +1342,18 @@
       "balancers": [
         {
           "tag": "balancer",
-          "selector": ["proxy"],
+          "selector": [
+            "proxy"
+          ],
           "strategy": {
             "type": "leastLoad",
             "settings": {
               "maxRTT": "2s",
               "expected": 2,
-              "baselines": ["400ms", "800ms"],
+              "baselines": [
+                "400ms",
+                "800ms"
+              ],
               "tolerance": 0.25
             }
           }
@@ -1332,7 +1376,11 @@
         "sniffing": {
           "enabled": true,
           "routeOnly": true,
-          "destOverride": ["http", "tls", "quic"]
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       },
       {
@@ -1347,7 +1395,11 @@
         "sniffing": {
           "enabled": true,
           "routeOnly": true,
-          "destOverride": ["http", "tls", "quic"]
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       }
     ],
@@ -1381,7 +1433,9 @@
           "tlsSettings": {
             "serverName": "it1.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1414,7 +1468,9 @@
           "tlsSettings": {
             "serverName": "it2.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1447,7 +1503,9 @@
           "tlsSettings": {
             "serverName": "it3.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1480,7 +1538,9 @@
           "tlsSettings": {
             "serverName": "it4.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1513,7 +1573,9 @@
           "tlsSettings": {
             "serverName": "it5.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1546,7 +1608,9 @@
           "tlsSettings": {
             "serverName": "it6.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1579,7 +1643,9 @@
           "tlsSettings": {
             "serverName": "it7.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1612,7 +1678,9 @@
           "tlsSettings": {
             "serverName": "it8.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1645,7 +1713,9 @@
           "tlsSettings": {
             "serverName": "it9.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1678,7 +1748,9 @@
           "tlsSettings": {
             "serverName": "it10.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1711,7 +1783,9 @@
           "tlsSettings": {
             "serverName": "it11.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1744,7 +1818,9 @@
           "tlsSettings": {
             "serverName": "it12.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1777,7 +1853,9 @@
           "tlsSettings": {
             "serverName": "it13.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1810,7 +1888,9 @@
           "tlsSettings": {
             "serverName": "it14.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1843,7 +1923,9 @@
           "tlsSettings": {
             "serverName": "it15.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1876,7 +1958,9 @@
           "tlsSettings": {
             "serverName": "it16.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1909,7 +1993,9 @@
           "tlsSettings": {
             "serverName": "it17.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1942,7 +2028,9 @@
           "tlsSettings": {
             "serverName": "it18.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -1975,7 +2063,9 @@
           "tlsSettings": {
             "serverName": "it19.tylersuper.click",
             "fingerprint": "firefox",
-            "alpn": ["h2"]
+            "alpn": [
+              "h2"
+            ]
           }
         }
       },
@@ -2003,7 +2093,9 @@
         "destination": "http://connectivitycheck.gstatic.com/generate_204",
         "connectivity": "http://connectivitycheck.gstatic.com/generate_204"
       },
-      "subjectSelector": ["proxy"]
+      "subjectSelector": [
+        "proxy"
+      ]
     },
     "remarks": "🇮🇹 Италия"
   },
@@ -2044,7 +2136,9 @@
           "outboundTag": "dns-out"
         },
         {
-          "domain": ["geosite:TORRENT"],
+          "domain": [
+            "geosite:TORRENT"
+          ],
           "ruleTag": "TORRENT_BY_DOMAIN",
           "outboundTag": "block"
         },
@@ -2084,11 +2178,16 @@
         },
         {
           "type": "field",
-          "protocol": ["bittorrent"],
+          "protocol": [
+            "bittorrent"
+          ],
           "outboundTag": "block"
         },
         {
-          "ip": ["geoip:private", "geoip:direct"],
+          "ip": [
+            "geoip:private",
+            "geoip:direct"
+          ],
           "type": "field",
           "outboundTag": "direct"
         },
@@ -2101,13 +2200,18 @@
       "balancers": [
         {
           "tag": "balancer",
-          "selector": ["proxy"],
+          "selector": [
+            "proxy"
+          ],
           "strategy": {
             "type": "leastLoad",
             "settings": {
               "maxRTT": "3s",
               "expected": 1,
-              "baselines": ["400ms", "800ms"],
+              "baselines": [
+                "400ms",
+                "800ms"
+              ],
               "tolerance": 0.25
             }
           },
@@ -2131,7 +2235,11 @@
         "sniffing": {
           "enabled": true,
           "routeOnly": true,
-          "destOverride": ["http", "tls", "quic"]
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       },
       {
@@ -2146,7 +2254,11 @@
         "sniffing": {
           "enabled": true,
           "routeOnly": true,
-          "destOverride": ["http", "tls", "quic"]
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       }
     ],
@@ -2787,9 +2899,11 @@
         "destination": "http://connectivitycheck.gstatic.com/generate_204",
         "connectivity": "http://connectivitycheck.gstatic.com/generate_204"
       },
-      "subjectSelector": ["proxy"]
+      "subjectSelector": [
+        "proxy"
+      ]
     },
-    "remarks": "🇳🇱 Нидерланды ⭐️"
+    "remarks": "🇳🇱 Нидерланды ⚡"
   },
   {
     "dns": {
@@ -2828,7 +2942,9 @@
           "outboundTag": "dns-out"
         },
         {
-          "domain": ["geosite:TORRENT"],
+          "domain": [
+            "geosite:TORRENT"
+          ],
           "ruleTag": "TORRENT_BY_DOMAIN",
           "outboundTag": "block"
         },
@@ -2868,11 +2984,16 @@
         },
         {
           "type": "field",
-          "protocol": ["bittorrent"],
+          "protocol": [
+            "bittorrent"
+          ],
           "outboundTag": "block"
         },
         {
-          "ip": ["geoip:private", "geoip:direct"],
+          "ip": [
+            "geoip:private",
+            "geoip:direct"
+          ],
           "type": "field",
           "outboundTag": "direct"
         },
@@ -2885,13 +3006,18 @@
       "balancers": [
         {
           "tag": "balancer",
-          "selector": ["proxy"],
+          "selector": [
+            "proxy"
+          ],
           "strategy": {
             "type": "leastLoad",
             "settings": {
               "maxRTT": "3s",
               "expected": 1,
-              "baselines": ["400ms", "800ms"],
+              "baselines": [
+                "400ms",
+                "800ms"
+              ],
               "tolerance": 0.25
             }
           },
@@ -2915,7 +3041,11 @@
         "sniffing": {
           "enabled": true,
           "routeOnly": true,
-          "destOverride": ["http", "tls", "quic"]
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       },
       {
@@ -2930,7 +3060,11 @@
         "sniffing": {
           "enabled": true,
           "routeOnly": true,
-          "destOverride": ["http", "tls", "quic"]
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       }
     ],
@@ -3163,13 +3297,18 @@
         "destination": "http://connectivitycheck.gstatic.com/generate_204",
         "connectivity": "http://connectivitycheck.gstatic.com/generate_204"
       },
-      "subjectSelector": ["proxy"]
+      "subjectSelector": [
+        "proxy"
+      ]
     },
     "remarks": "🇩🇪 Германия"
   },
   {
     "dns": {
-      "servers": ["77.88.8.8", "77.88.8.1"]
+      "servers": [
+        "77.88.8.8",
+        "77.88.8.1"
+      ]
     },
     "routing": {
       "rules": [
@@ -3426,17 +3565,23 @@
         },
         {
           "type": "field",
-          "protocol": ["bittorrent"],
+          "protocol": [
+            "bittorrent"
+          ],
           "outboundTag": "direct"
         },
         {
-          "ip": ["geoip:private"],
+          "ip": [
+            "geoip:private"
+          ],
           "type": "field",
           "outboundTag": "direct"
         },
         {
           "type": "field",
-          "domain": ["geosite:private"],
+          "domain": [
+            "geosite:private"
+          ],
           "outboundTag": "direct"
         }
       ],
@@ -3453,7 +3598,11 @@
         },
         "sniffing": {
           "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       },
       {
@@ -3463,7 +3612,11 @@
         "protocol": "http",
         "sniffing": {
           "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       }
     ],
@@ -3510,7 +3663,10 @@
   },
   {
     "dns": {
-      "servers": ["77.88.8.8", "77.88.8.1"]
+      "servers": [
+        "77.88.8.8",
+        "77.88.8.1"
+      ]
     },
     "routing": {
       "rules": [
@@ -3767,17 +3923,23 @@
         },
         {
           "type": "field",
-          "protocol": ["bittorrent"],
+          "protocol": [
+            "bittorrent"
+          ],
           "outboundTag": "direct"
         },
         {
-          "ip": ["geoip:private"],
+          "ip": [
+            "geoip:private"
+          ],
           "type": "field",
           "outboundTag": "direct"
         },
         {
           "type": "field",
-          "domain": ["geosite:private"],
+          "domain": [
+            "geosite:private"
+          ],
           "outboundTag": "direct"
         }
       ],
@@ -3794,7 +3956,11 @@
         },
         "sniffing": {
           "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       },
       {
@@ -3804,7 +3970,11 @@
         "protocol": "http",
         "sniffing": {
           "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       }
     ],
@@ -3851,7 +4021,10 @@
   },
   {
     "dns": {
-      "servers": ["77.88.8.8", "77.88.8.1"]
+      "servers": [
+        "77.88.8.8",
+        "77.88.8.1"
+      ]
     },
     "routing": {
       "rules": [
@@ -4108,17 +4281,23 @@
         },
         {
           "type": "field",
-          "protocol": ["bittorrent"],
+          "protocol": [
+            "bittorrent"
+          ],
           "outboundTag": "direct"
         },
         {
-          "ip": ["geoip:private"],
+          "ip": [
+            "geoip:private"
+          ],
           "type": "field",
           "outboundTag": "direct"
         },
         {
           "type": "field",
-          "domain": ["geosite:private"],
+          "domain": [
+            "geosite:private"
+          ],
           "outboundTag": "direct"
         }
       ],
@@ -4135,348 +4314,11 @@
         },
         "sniffing": {
           "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
-        }
-      },
-      {
-        "tag": "http",
-        "port": 10809,
-        "listen": "127.0.0.1",
-        "protocol": "http",
-        "sniffing": {
-          "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
-        }
-      }
-    ],
-    "outbounds": [
-      {
-        "tag": "proxy",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "46.243.142.121",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "a3a34b58-14b4-41cb-a555-8752f7694916",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
           ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "rutube.ru",
-            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-            "shortId": "43dcff53849b81e6",
-            "fingerprint": "firefox"
-          }
-        }
-      },
-      {
-        "tag": "direct",
-        "protocol": "freedom"
-      },
-      {
-        "tag": "block",
-        "protocol": "blackhole"
-      }
-    ],
-    "remarks": "🇳🇱 Нидерланды 3"
-  },
-  {
-    "dns": {
-      "servers": ["77.88.8.8", "77.88.8.1"]
-    },
-    "routing": {
-      "rules": [
-        {
-          "type": "field",
-          "domain": [
-            "1tv.ru",
-            "2gis.ru",
-            "360.yandex.ru",
-            "5-tv.ru",
-            "5ka.ru",
-            "5post.ru",
-            "aeroflot.ru",
-            "agent.mail.ru",
-            "aif.ru",
-            "alfa-bank.ru",
-            "alfabank.com",
-            "alfabank.ru",
-            "alice.yandex.ru",
-            "auchan.ru",
-            "av.ru",
-            "avatars.mds.yandex.net",
-            "avito.ru",
-            "beeline.ru",
-            "beeline.tv",
-            "belkacar.ru",
-            "biz.mail.ru",
-            "burgerking.ru",
-            "cbr.ru",
-            "cdek.ru",
-            "cesar.ru",
-            "chizhik.club",
-            "chizhik.ru",
-            "citydrive.ru",
-            "combo.mail.ru",
-            "council.gov.ru",
-            "crpt.ru",
-            "ctc.ru",
-            "customs.gov.ru",
-            "delimobil.ru",
-            "dellin.ru",
-            "detmir.ru",
-            "digital.gov.ru",
-            "dixy.ru",
-            "dnevnik.ru",
-            "dom.gosuslugi.ru",
-            "domashniy.ru",
-            "domclick.ru",
-            "duma.gov.ru",
-            "dzen.ru",
-            "eda.yandex.ru",
-            "edadil.ru",
-            "energoatom.ru",
-            "ertelecom.ru",
-            "evotor.ru",
-            "express.x5.ru",
-            "fas.gov.ru",
-            "finuslugi.ru",
-            "fms.gov.ru",
-            "fns.ru",
-            "food.ru",
-            "friday.ru",
-            "fssp.gov.ru",
-            "fts.ru",
-            "gazeta.ru",
-            "genproc.gov.ru",
-            "gismeteo.ru",
-            "giszkh.ru",
-            "go.yandex",
-            "goskey.ru",
-            "gossopot.ru",
-            "gosuslugi.ru",
-            "gosweb.gosuslugi.ru",
-            "government.ru",
-            "grandtrain.ru",
-            "hh.ru",
-            "imgsmail.ru",
-            "inspector.nalog.ru",
-            "ismotp.crpt.ru",
-            "itogisg.ru",
-            "ivi.ru",
-            "iz.ru",
-            "kinopoisk.ru",
-            "kion.ru",
-            "kommersant.ru",
-            "kontur.ru",
-            "kp.ru",
-            "krasyar.ru",
-            "kremlin.ru",
-            "kuper.ru",
-            "lavka.yandex.ru",
-            "lenenergo.ru",
-            "lenta.ru",
-            "lk.megafon.ru",
-            "lk.mts.ru",
-            "lk.rt.ru",
-            "lkfl.nalog.ru",
-            "lkip.nalog.ru",
-            "lkul.nalog.ru",
-            "magnit.ru",
-            "mail.ru",
-            "maps.yandex.ru",
-            "market.yandex.ru",
-            "markirovka.ru",
-            "matchtv.ru",
-            "max.ru",
-            "maxmail.ru",
-            "mchs.gov.ru",
-            "mcx.gov.ru",
-            "megafon.ru",
-            "megamarket.ru",
-            "metro-cc.ru",
-            "mid.ru",
-            "mil.ru",
-            "minenergo.gov.ru",
-            "minfin.gov.ru",
-            "minjust.gov.ru",
-            "minobrnauki.gov.ru",
-            "minpromtorg.gov.ru",
-            "mintrans.gov.ru",
-            "mintrud.gov.ru",
-            "minvr.gov.ru",
-            "minzdrav.gov.ru",
-            "mir.plus",
-            "mironline.ru",
-            "mirpay.ru",
-            "mirtv.ru",
-            "mk.ru",
-            "moex.com",
-            "mos.ru",
-            "motivtelecom.ru",
-            "moyviktoria.ru",
-            "mrsk-center.ru",
-            "msk.ru",
-            "mts-link.ru",
-            "mts.ru",
-            "mtsbank.ru",
-            "music.mts.ru",
-            "music.yandex.ru",
-            "muztv.ru",
-            "mvd.ru",
-            "myrosmol.ru",
-            "myteam.mail.ru",
-            "nalog.gov.ru",
-            "nalog.ru",
-            "nspk.ru",
-            "ntv.ru",
-            "odnoklassniki.ru",
-            "ok.ru",
-            "okko.tv",
-            "okmarket.ru",
-            "otello.ru",
-            "otr-online.ru",
-            "ozon.ru",
-            "passport.yandex.ru",
-            "perekrestok.ru",
-            "pervye.ru",
-            "pervyedvizheniya.ru",
-            "petrovich.ru",
-            "pnp.ru",
-            "pobeda.aero",
-            "pochta.ru",
-            "pos.gosuslugi.ru",
-            "premium.mts.ru",
-            "psbank.ru",
-            "pyaterochka.ru",
-            "radioplayer.ru",
-            "rambler.ru",
-            "rbc.ru",
-            "reformagkh.ru",
-            "ren.tv",
-            "rg.ru",
-            "ria.ru",
-            "rkn.gov.ru",
-            "rosagrolizing.ru",
-            "rosatom.ru",
-            "rospatent.gov.ru",
-            "rospotrebnadzor.ru",
-            "rosreestr.gov.ru",
-            "rosseti.ru",
-            "roszdravnadzor.ru",
-            "rsv.ru",
-            "rt.com",
-            "rt.ru",
-            "rusatom-energy.com",
-            "rustore.ru",
-            "rutube.ru",
-            "rzd.ru",
-            "samokat.ru",
-            "sbp.nspk.ru",
-            "service.urentbike.ru",
-            "skbkontur.ru",
-            "slata.ru",
-            "spar.ru",
-            "spastv.ru",
-            "stroki.mts.ru",
-            "t-mobile.ru",
-            "t2.ru",
-            "tass.ru",
-            "taxi-maximum.com",
-            "taxi.yandex.ru",
-            "taximaxim.ru",
-            "tensor.ru",
-            "ticketland.ru",
-            "tns-e.ru",
-            "tnt-online.ru",
-            "topdelivery.ru",
-            "travel.yandex.ru",
-            "travel2moscow.com",
-            "travelrussia.ru",
-            "tutu.ru",
-            "tv3.ru",
-            "tvc.ru",
-            "tvoyhod.ru",
-            "urentbike.ru",
-            "userapi.com",
-            "vedomosti.ru",
-            "vgtrk.com",
-            "vitrina.tv",
-            "vk.com",
-            "vk.me",
-            "vk.ru",
-            "vk.team",
-            "vkmusic.ru",
-            "vkplay.ru",
-            "vkusno-i-tochka.ru",
-            "vkusvill.ru",
-            "vkvideo.ru",
-            "vmeste-rf.tv",
-            "vtb.ru",
-            "vybory.gov.ru",
-            "wildberries.ru",
-            "x5.ru",
-            "x5group.ru",
-            "x5tech.ru",
-            "xn--80ajghhoc2aj1c8b.xn--p1ai",
-            "xn--b1agvbfco4a.xn--p1ai",
-            "xn--e1afmapc.xn--p1ai",
-            "xn--e1afmkfd.xn--p1ai",
-            "xn--l1aeji.xn--p1ai",
-            "ya.ru",
-            "yago.yandex.ru",
-            "yandex-team.ru",
-            "yandex.com",
-            "yandex.net",
-            "yandex.ru",
-            "yandexcloud.net",
-            "yandexdatahub.ru",
-            "yandexpro.ru",
-            "yastatic.net",
-            "zvezdatv.ru"
-          ],
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "protocol": ["bittorrent"],
-          "outboundTag": "direct"
-        },
-        {
-          "ip": ["geoip:private"],
-          "type": "field",
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "domain": ["geosite:private"],
-          "outboundTag": "direct"
-        }
-      ],
-      "domainStrategy": "IPIfNonMatch"
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "port": 10808,
-        "listen": "127.0.0.1",
-        "protocol": "socks",
-        "settings": {
-          "udp": true
-        },
-        "sniffing": {
-          "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
         }
       },
       {
@@ -4486,7 +4328,11 @@
         "protocol": "http",
         "sniffing": {
           "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       }
     ],
@@ -4533,7 +4379,10 @@
   },
   {
     "dns": {
-      "servers": ["77.88.8.8", "77.88.8.1"]
+      "servers": [
+        "77.88.8.8",
+        "77.88.8.1"
+      ]
     },
     "routing": {
       "rules": [
@@ -4790,17 +4639,23 @@
         },
         {
           "type": "field",
-          "protocol": ["bittorrent"],
+          "protocol": [
+            "bittorrent"
+          ],
           "outboundTag": "direct"
         },
         {
-          "ip": ["geoip:private"],
+          "ip": [
+            "geoip:private"
+          ],
           "type": "field",
           "outboundTag": "direct"
         },
         {
           "type": "field",
-          "domain": ["geosite:private"],
+          "domain": [
+            "geosite:private"
+          ],
           "outboundTag": "direct"
         }
       ],
@@ -4817,7 +4672,11 @@
         },
         "sniffing": {
           "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       },
       {
@@ -4827,7 +4686,11 @@
         "protocol": "http",
         "sniffing": {
           "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       }
     ],
@@ -4874,7 +4737,10 @@
   },
   {
     "dns": {
-      "servers": ["77.88.8.8", "77.88.8.1"]
+      "servers": [
+        "77.88.8.8",
+        "77.88.8.1"
+      ]
     },
     "routing": {
       "rules": [
@@ -5131,17 +4997,23 @@
         },
         {
           "type": "field",
-          "protocol": ["bittorrent"],
+          "protocol": [
+            "bittorrent"
+          ],
           "outboundTag": "direct"
         },
         {
-          "ip": ["geoip:private"],
+          "ip": [
+            "geoip:private"
+          ],
           "type": "field",
           "outboundTag": "direct"
         },
         {
           "type": "field",
-          "domain": ["geosite:private"],
+          "domain": [
+            "geosite:private"
+          ],
           "outboundTag": "direct"
         }
       ],
@@ -5158,348 +5030,11 @@
         },
         "sniffing": {
           "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
-        }
-      },
-      {
-        "tag": "http",
-        "port": 10809,
-        "listen": "127.0.0.1",
-        "protocol": "http",
-        "sniffing": {
-          "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
-        }
-      }
-    ],
-    "outbounds": [
-      {
-        "tag": "proxy",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "46.243.142.104",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "1cca2cd9-78a0-0005-903e-50da79f92340",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
           ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "rutube.ru",
-            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-            "shortId": "43dcff53849b81e6",
-            "fingerprint": "qq"
-          }
-        }
-      },
-      {
-        "tag": "direct",
-        "protocol": "freedom"
-      },
-      {
-        "tag": "block",
-        "protocol": "blackhole"
-      }
-    ],
-    "remarks": "🇹🇷 Турция 2"
-  },
-  {
-    "dns": {
-      "servers": ["77.88.8.8", "77.88.8.1"]
-    },
-    "routing": {
-      "rules": [
-        {
-          "type": "field",
-          "domain": [
-            "1tv.ru",
-            "2gis.ru",
-            "360.yandex.ru",
-            "5-tv.ru",
-            "5ka.ru",
-            "5post.ru",
-            "aeroflot.ru",
-            "agent.mail.ru",
-            "aif.ru",
-            "alfa-bank.ru",
-            "alfabank.com",
-            "alfabank.ru",
-            "alice.yandex.ru",
-            "auchan.ru",
-            "av.ru",
-            "avatars.mds.yandex.net",
-            "avito.ru",
-            "beeline.ru",
-            "beeline.tv",
-            "belkacar.ru",
-            "biz.mail.ru",
-            "burgerking.ru",
-            "cbr.ru",
-            "cdek.ru",
-            "cesar.ru",
-            "chizhik.club",
-            "chizhik.ru",
-            "citydrive.ru",
-            "combo.mail.ru",
-            "council.gov.ru",
-            "crpt.ru",
-            "ctc.ru",
-            "customs.gov.ru",
-            "delimobil.ru",
-            "dellin.ru",
-            "detmir.ru",
-            "digital.gov.ru",
-            "dixy.ru",
-            "dnevnik.ru",
-            "dom.gosuslugi.ru",
-            "domashniy.ru",
-            "domclick.ru",
-            "duma.gov.ru",
-            "dzen.ru",
-            "eda.yandex.ru",
-            "edadil.ru",
-            "energoatom.ru",
-            "ertelecom.ru",
-            "evotor.ru",
-            "express.x5.ru",
-            "fas.gov.ru",
-            "finuslugi.ru",
-            "fms.gov.ru",
-            "fns.ru",
-            "food.ru",
-            "friday.ru",
-            "fssp.gov.ru",
-            "fts.ru",
-            "gazeta.ru",
-            "genproc.gov.ru",
-            "gismeteo.ru",
-            "giszkh.ru",
-            "go.yandex",
-            "goskey.ru",
-            "gossopot.ru",
-            "gosuslugi.ru",
-            "gosweb.gosuslugi.ru",
-            "government.ru",
-            "grandtrain.ru",
-            "hh.ru",
-            "imgsmail.ru",
-            "inspector.nalog.ru",
-            "ismotp.crpt.ru",
-            "itogisg.ru",
-            "ivi.ru",
-            "iz.ru",
-            "kinopoisk.ru",
-            "kion.ru",
-            "kommersant.ru",
-            "kontur.ru",
-            "kp.ru",
-            "krasyar.ru",
-            "kremlin.ru",
-            "kuper.ru",
-            "lavka.yandex.ru",
-            "lenenergo.ru",
-            "lenta.ru",
-            "lk.megafon.ru",
-            "lk.mts.ru",
-            "lk.rt.ru",
-            "lkfl.nalog.ru",
-            "lkip.nalog.ru",
-            "lkul.nalog.ru",
-            "magnit.ru",
-            "mail.ru",
-            "maps.yandex.ru",
-            "market.yandex.ru",
-            "markirovka.ru",
-            "matchtv.ru",
-            "max.ru",
-            "maxmail.ru",
-            "mchs.gov.ru",
-            "mcx.gov.ru",
-            "megafon.ru",
-            "megamarket.ru",
-            "metro-cc.ru",
-            "mid.ru",
-            "mil.ru",
-            "minenergo.gov.ru",
-            "minfin.gov.ru",
-            "minjust.gov.ru",
-            "minobrnauki.gov.ru",
-            "minpromtorg.gov.ru",
-            "mintrans.gov.ru",
-            "mintrud.gov.ru",
-            "minvr.gov.ru",
-            "minzdrav.gov.ru",
-            "mir.plus",
-            "mironline.ru",
-            "mirpay.ru",
-            "mirtv.ru",
-            "mk.ru",
-            "moex.com",
-            "mos.ru",
-            "motivtelecom.ru",
-            "moyviktoria.ru",
-            "mrsk-center.ru",
-            "msk.ru",
-            "mts-link.ru",
-            "mts.ru",
-            "mtsbank.ru",
-            "music.mts.ru",
-            "music.yandex.ru",
-            "muztv.ru",
-            "mvd.ru",
-            "myrosmol.ru",
-            "myteam.mail.ru",
-            "nalog.gov.ru",
-            "nalog.ru",
-            "nspk.ru",
-            "ntv.ru",
-            "odnoklassniki.ru",
-            "ok.ru",
-            "okko.tv",
-            "okmarket.ru",
-            "otello.ru",
-            "otr-online.ru",
-            "ozon.ru",
-            "passport.yandex.ru",
-            "perekrestok.ru",
-            "pervye.ru",
-            "pervyedvizheniya.ru",
-            "petrovich.ru",
-            "pnp.ru",
-            "pobeda.aero",
-            "pochta.ru",
-            "pos.gosuslugi.ru",
-            "premium.mts.ru",
-            "psbank.ru",
-            "pyaterochka.ru",
-            "radioplayer.ru",
-            "rambler.ru",
-            "rbc.ru",
-            "reformagkh.ru",
-            "ren.tv",
-            "rg.ru",
-            "ria.ru",
-            "rkn.gov.ru",
-            "rosagrolizing.ru",
-            "rosatom.ru",
-            "rospatent.gov.ru",
-            "rospotrebnadzor.ru",
-            "rosreestr.gov.ru",
-            "rosseti.ru",
-            "roszdravnadzor.ru",
-            "rsv.ru",
-            "rt.com",
-            "rt.ru",
-            "rusatom-energy.com",
-            "rustore.ru",
-            "rutube.ru",
-            "rzd.ru",
-            "samokat.ru",
-            "sbp.nspk.ru",
-            "service.urentbike.ru",
-            "skbkontur.ru",
-            "slata.ru",
-            "spar.ru",
-            "spastv.ru",
-            "stroki.mts.ru",
-            "t-mobile.ru",
-            "t2.ru",
-            "tass.ru",
-            "taxi-maximum.com",
-            "taxi.yandex.ru",
-            "taximaxim.ru",
-            "tensor.ru",
-            "ticketland.ru",
-            "tns-e.ru",
-            "tnt-online.ru",
-            "topdelivery.ru",
-            "travel.yandex.ru",
-            "travel2moscow.com",
-            "travelrussia.ru",
-            "tutu.ru",
-            "tv3.ru",
-            "tvc.ru",
-            "tvoyhod.ru",
-            "urentbike.ru",
-            "userapi.com",
-            "vedomosti.ru",
-            "vgtrk.com",
-            "vitrina.tv",
-            "vk.com",
-            "vk.me",
-            "vk.ru",
-            "vk.team",
-            "vkmusic.ru",
-            "vkplay.ru",
-            "vkusno-i-tochka.ru",
-            "vkusvill.ru",
-            "vkvideo.ru",
-            "vmeste-rf.tv",
-            "vtb.ru",
-            "vybory.gov.ru",
-            "wildberries.ru",
-            "x5.ru",
-            "x5group.ru",
-            "x5tech.ru",
-            "xn--80ajghhoc2aj1c8b.xn--p1ai",
-            "xn--b1agvbfco4a.xn--p1ai",
-            "xn--e1afmapc.xn--p1ai",
-            "xn--e1afmkfd.xn--p1ai",
-            "xn--l1aeji.xn--p1ai",
-            "ya.ru",
-            "yago.yandex.ru",
-            "yandex-team.ru",
-            "yandex.com",
-            "yandex.net",
-            "yandex.ru",
-            "yandexcloud.net",
-            "yandexdatahub.ru",
-            "yandexpro.ru",
-            "yastatic.net",
-            "zvezdatv.ru"
-          ],
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "protocol": ["bittorrent"],
-          "outboundTag": "direct"
-        },
-        {
-          "ip": ["geoip:private"],
-          "type": "field",
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "domain": ["geosite:private"],
-          "outboundTag": "direct"
-        }
-      ],
-      "domainStrategy": "IPIfNonMatch"
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "port": 10808,
-        "listen": "127.0.0.1",
-        "protocol": "socks",
-        "settings": {
-          "udp": true
-        },
-        "sniffing": {
-          "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
         }
       },
       {
@@ -5509,348 +5044,11 @@
         "protocol": "http",
         "sniffing": {
           "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
-        }
-      }
-    ],
-    "outbounds": [
-      {
-        "tag": "proxy",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "46.243.142.104",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "1cca2cd9-78a0-0005-903e-50da79f92340",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
           ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "rutube.ru",
-            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-            "shortId": "43dcff53849b81e6",
-            "fingerprint": "qq"
-          }
-        }
-      },
-      {
-        "tag": "direct",
-        "protocol": "freedom"
-      },
-      {
-        "tag": "block",
-        "protocol": "blackhole"
-      }
-    ],
-    "remarks": "🇷🇺 Россия 2"
-  },
-  {
-    "dns": {
-      "servers": ["77.88.8.8", "77.88.8.1"]
-    },
-    "routing": {
-      "rules": [
-        {
-          "type": "field",
-          "domain": [
-            "1tv.ru",
-            "2gis.ru",
-            "360.yandex.ru",
-            "5-tv.ru",
-            "5ka.ru",
-            "5post.ru",
-            "aeroflot.ru",
-            "agent.mail.ru",
-            "aif.ru",
-            "alfa-bank.ru",
-            "alfabank.com",
-            "alfabank.ru",
-            "alice.yandex.ru",
-            "auchan.ru",
-            "av.ru",
-            "avatars.mds.yandex.net",
-            "avito.ru",
-            "beeline.ru",
-            "beeline.tv",
-            "belkacar.ru",
-            "biz.mail.ru",
-            "burgerking.ru",
-            "cbr.ru",
-            "cdek.ru",
-            "cesar.ru",
-            "chizhik.club",
-            "chizhik.ru",
-            "citydrive.ru",
-            "combo.mail.ru",
-            "council.gov.ru",
-            "crpt.ru",
-            "ctc.ru",
-            "customs.gov.ru",
-            "delimobil.ru",
-            "dellin.ru",
-            "detmir.ru",
-            "digital.gov.ru",
-            "dixy.ru",
-            "dnevnik.ru",
-            "dom.gosuslugi.ru",
-            "domashniy.ru",
-            "domclick.ru",
-            "duma.gov.ru",
-            "dzen.ru",
-            "eda.yandex.ru",
-            "edadil.ru",
-            "energoatom.ru",
-            "ertelecom.ru",
-            "evotor.ru",
-            "express.x5.ru",
-            "fas.gov.ru",
-            "finuslugi.ru",
-            "fms.gov.ru",
-            "fns.ru",
-            "food.ru",
-            "friday.ru",
-            "fssp.gov.ru",
-            "fts.ru",
-            "gazeta.ru",
-            "genproc.gov.ru",
-            "gismeteo.ru",
-            "giszkh.ru",
-            "go.yandex",
-            "goskey.ru",
-            "gossopot.ru",
-            "gosuslugi.ru",
-            "gosweb.gosuslugi.ru",
-            "government.ru",
-            "grandtrain.ru",
-            "hh.ru",
-            "imgsmail.ru",
-            "inspector.nalog.ru",
-            "ismotp.crpt.ru",
-            "itogisg.ru",
-            "ivi.ru",
-            "iz.ru",
-            "kinopoisk.ru",
-            "kion.ru",
-            "kommersant.ru",
-            "kontur.ru",
-            "kp.ru",
-            "krasyar.ru",
-            "kremlin.ru",
-            "kuper.ru",
-            "lavka.yandex.ru",
-            "lenenergo.ru",
-            "lenta.ru",
-            "lk.megafon.ru",
-            "lk.mts.ru",
-            "lk.rt.ru",
-            "lkfl.nalog.ru",
-            "lkip.nalog.ru",
-            "lkul.nalog.ru",
-            "magnit.ru",
-            "mail.ru",
-            "maps.yandex.ru",
-            "market.yandex.ru",
-            "markirovka.ru",
-            "matchtv.ru",
-            "max.ru",
-            "maxmail.ru",
-            "mchs.gov.ru",
-            "mcx.gov.ru",
-            "megafon.ru",
-            "megamarket.ru",
-            "metro-cc.ru",
-            "mid.ru",
-            "mil.ru",
-            "minenergo.gov.ru",
-            "minfin.gov.ru",
-            "minjust.gov.ru",
-            "minobrnauki.gov.ru",
-            "minpromtorg.gov.ru",
-            "mintrans.gov.ru",
-            "mintrud.gov.ru",
-            "minvr.gov.ru",
-            "minzdrav.gov.ru",
-            "mir.plus",
-            "mironline.ru",
-            "mirpay.ru",
-            "mirtv.ru",
-            "mk.ru",
-            "moex.com",
-            "mos.ru",
-            "motivtelecom.ru",
-            "moyviktoria.ru",
-            "mrsk-center.ru",
-            "msk.ru",
-            "mts-link.ru",
-            "mts.ru",
-            "mtsbank.ru",
-            "music.mts.ru",
-            "music.yandex.ru",
-            "muztv.ru",
-            "mvd.ru",
-            "myrosmol.ru",
-            "myteam.mail.ru",
-            "nalog.gov.ru",
-            "nalog.ru",
-            "nspk.ru",
-            "ntv.ru",
-            "odnoklassniki.ru",
-            "ok.ru",
-            "okko.tv",
-            "okmarket.ru",
-            "otello.ru",
-            "otr-online.ru",
-            "ozon.ru",
-            "passport.yandex.ru",
-            "perekrestok.ru",
-            "pervye.ru",
-            "pervyedvizheniya.ru",
-            "petrovich.ru",
-            "pnp.ru",
-            "pobeda.aero",
-            "pochta.ru",
-            "pos.gosuslugi.ru",
-            "premium.mts.ru",
-            "psbank.ru",
-            "pyaterochka.ru",
-            "radioplayer.ru",
-            "rambler.ru",
-            "rbc.ru",
-            "reformagkh.ru",
-            "ren.tv",
-            "rg.ru",
-            "ria.ru",
-            "rkn.gov.ru",
-            "rosagrolizing.ru",
-            "rosatom.ru",
-            "rospatent.gov.ru",
-            "rospotrebnadzor.ru",
-            "rosreestr.gov.ru",
-            "rosseti.ru",
-            "roszdravnadzor.ru",
-            "rsv.ru",
-            "rt.com",
-            "rt.ru",
-            "rusatom-energy.com",
-            "rustore.ru",
-            "rutube.ru",
-            "rzd.ru",
-            "samokat.ru",
-            "sbp.nspk.ru",
-            "service.urentbike.ru",
-            "skbkontur.ru",
-            "slata.ru",
-            "spar.ru",
-            "spastv.ru",
-            "stroki.mts.ru",
-            "t-mobile.ru",
-            "t2.ru",
-            "tass.ru",
-            "taxi-maximum.com",
-            "taxi.yandex.ru",
-            "taximaxim.ru",
-            "tensor.ru",
-            "ticketland.ru",
-            "tns-e.ru",
-            "tnt-online.ru",
-            "topdelivery.ru",
-            "travel.yandex.ru",
-            "travel2moscow.com",
-            "travelrussia.ru",
-            "tutu.ru",
-            "tv3.ru",
-            "tvc.ru",
-            "tvoyhod.ru",
-            "urentbike.ru",
-            "userapi.com",
-            "vedomosti.ru",
-            "vgtrk.com",
-            "vitrina.tv",
-            "vk.com",
-            "vk.me",
-            "vk.ru",
-            "vk.team",
-            "vkmusic.ru",
-            "vkplay.ru",
-            "vkusno-i-tochka.ru",
-            "vkusvill.ru",
-            "vkvideo.ru",
-            "vmeste-rf.tv",
-            "vtb.ru",
-            "vybory.gov.ru",
-            "wildberries.ru",
-            "x5.ru",
-            "x5group.ru",
-            "x5tech.ru",
-            "xn--80ajghhoc2aj1c8b.xn--p1ai",
-            "xn--b1agvbfco4a.xn--p1ai",
-            "xn--e1afmapc.xn--p1ai",
-            "xn--e1afmkfd.xn--p1ai",
-            "xn--l1aeji.xn--p1ai",
-            "ya.ru",
-            "yago.yandex.ru",
-            "yandex-team.ru",
-            "yandex.com",
-            "yandex.net",
-            "yandex.ru",
-            "yandexcloud.net",
-            "yandexdatahub.ru",
-            "yandexpro.ru",
-            "yastatic.net",
-            "zvezdatv.ru"
-          ],
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "protocol": ["bittorrent"],
-          "outboundTag": "direct"
-        },
-        {
-          "ip": ["geoip:private"],
-          "type": "field",
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "domain": ["geosite:private"],
-          "outboundTag": "direct"
-        }
-      ],
-      "domainStrategy": "IPIfNonMatch"
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "port": 10808,
-        "listen": "127.0.0.1",
-        "protocol": "socks",
-        "settings": {
-          "udp": true
-        },
-        "sniffing": {
-          "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
-        }
-      },
-      {
-        "tag": "http",
-        "port": 10809,
-        "listen": "127.0.0.1",
-        "protocol": "http",
-        "sniffing": {
-          "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
         }
       }
     ],
@@ -5861,11 +5059,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "46.243.142.12",
+              "address": "46.243.142.242",
               "port": 8443,
               "users": [
                 {
-                  "id": "fa9c9f0f-a89c-0005-95d6-a8b47311a6d6",
+                  "id": "e0cd7096-0fb9-419f-bdf6-1ccb7281c11d",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -5893,347 +5091,6 @@
         "protocol": "blackhole"
       }
     ],
-    "remarks": "🇹🇷 Турция"
-  },
-  {
-    "dns": {
-      "servers": ["77.88.8.8", "77.88.8.1"]
-    },
-    "routing": {
-      "rules": [
-        {
-          "type": "field",
-          "domain": [
-            "1tv.ru",
-            "2gis.ru",
-            "360.yandex.ru",
-            "5-tv.ru",
-            "5ka.ru",
-            "5post.ru",
-            "aeroflot.ru",
-            "agent.mail.ru",
-            "aif.ru",
-            "alfa-bank.ru",
-            "alfabank.com",
-            "alfabank.ru",
-            "alice.yandex.ru",
-            "auchan.ru",
-            "av.ru",
-            "avatars.mds.yandex.net",
-            "avito.ru",
-            "beeline.ru",
-            "beeline.tv",
-            "belkacar.ru",
-            "biz.mail.ru",
-            "burgerking.ru",
-            "cbr.ru",
-            "cdek.ru",
-            "cesar.ru",
-            "chizhik.club",
-            "chizhik.ru",
-            "citydrive.ru",
-            "combo.mail.ru",
-            "council.gov.ru",
-            "crpt.ru",
-            "ctc.ru",
-            "customs.gov.ru",
-            "delimobil.ru",
-            "dellin.ru",
-            "detmir.ru",
-            "digital.gov.ru",
-            "dixy.ru",
-            "dnevnik.ru",
-            "dom.gosuslugi.ru",
-            "domashniy.ru",
-            "domclick.ru",
-            "duma.gov.ru",
-            "dzen.ru",
-            "eda.yandex.ru",
-            "edadil.ru",
-            "energoatom.ru",
-            "ertelecom.ru",
-            "evotor.ru",
-            "express.x5.ru",
-            "fas.gov.ru",
-            "finuslugi.ru",
-            "fms.gov.ru",
-            "fns.ru",
-            "food.ru",
-            "friday.ru",
-            "fssp.gov.ru",
-            "fts.ru",
-            "gazeta.ru",
-            "genproc.gov.ru",
-            "gismeteo.ru",
-            "giszkh.ru",
-            "go.yandex",
-            "goskey.ru",
-            "gossopot.ru",
-            "gosuslugi.ru",
-            "gosweb.gosuslugi.ru",
-            "government.ru",
-            "grandtrain.ru",
-            "hh.ru",
-            "imgsmail.ru",
-            "inspector.nalog.ru",
-            "ismotp.crpt.ru",
-            "itogisg.ru",
-            "ivi.ru",
-            "iz.ru",
-            "kinopoisk.ru",
-            "kion.ru",
-            "kommersant.ru",
-            "kontur.ru",
-            "kp.ru",
-            "krasyar.ru",
-            "kremlin.ru",
-            "kuper.ru",
-            "lavka.yandex.ru",
-            "lenenergo.ru",
-            "lenta.ru",
-            "lk.megafon.ru",
-            "lk.mts.ru",
-            "lk.rt.ru",
-            "lkfl.nalog.ru",
-            "lkip.nalog.ru",
-            "lkul.nalog.ru",
-            "magnit.ru",
-            "mail.ru",
-            "maps.yandex.ru",
-            "market.yandex.ru",
-            "markirovka.ru",
-            "matchtv.ru",
-            "max.ru",
-            "maxmail.ru",
-            "mchs.gov.ru",
-            "mcx.gov.ru",
-            "megafon.ru",
-            "megamarket.ru",
-            "metro-cc.ru",
-            "mid.ru",
-            "mil.ru",
-            "minenergo.gov.ru",
-            "minfin.gov.ru",
-            "minjust.gov.ru",
-            "minobrnauki.gov.ru",
-            "minpromtorg.gov.ru",
-            "mintrans.gov.ru",
-            "mintrud.gov.ru",
-            "minvr.gov.ru",
-            "minzdrav.gov.ru",
-            "mir.plus",
-            "mironline.ru",
-            "mirpay.ru",
-            "mirtv.ru",
-            "mk.ru",
-            "moex.com",
-            "mos.ru",
-            "motivtelecom.ru",
-            "moyviktoria.ru",
-            "mrsk-center.ru",
-            "msk.ru",
-            "mts-link.ru",
-            "mts.ru",
-            "mtsbank.ru",
-            "music.mts.ru",
-            "music.yandex.ru",
-            "muztv.ru",
-            "mvd.ru",
-            "myrosmol.ru",
-            "myteam.mail.ru",
-            "nalog.gov.ru",
-            "nalog.ru",
-            "nspk.ru",
-            "ntv.ru",
-            "odnoklassniki.ru",
-            "ok.ru",
-            "okko.tv",
-            "okmarket.ru",
-            "otello.ru",
-            "otr-online.ru",
-            "ozon.ru",
-            "passport.yandex.ru",
-            "perekrestok.ru",
-            "pervye.ru",
-            "pervyedvizheniya.ru",
-            "petrovich.ru",
-            "pnp.ru",
-            "pobeda.aero",
-            "pochta.ru",
-            "pos.gosuslugi.ru",
-            "premium.mts.ru",
-            "psbank.ru",
-            "pyaterochka.ru",
-            "radioplayer.ru",
-            "rambler.ru",
-            "rbc.ru",
-            "reformagkh.ru",
-            "ren.tv",
-            "rg.ru",
-            "ria.ru",
-            "rkn.gov.ru",
-            "rosagrolizing.ru",
-            "rosatom.ru",
-            "rospatent.gov.ru",
-            "rospotrebnadzor.ru",
-            "rosreestr.gov.ru",
-            "rosseti.ru",
-            "roszdravnadzor.ru",
-            "rsv.ru",
-            "rt.com",
-            "rt.ru",
-            "rusatom-energy.com",
-            "rustore.ru",
-            "rutube.ru",
-            "rzd.ru",
-            "samokat.ru",
-            "sbp.nspk.ru",
-            "service.urentbike.ru",
-            "skbkontur.ru",
-            "slata.ru",
-            "spar.ru",
-            "spastv.ru",
-            "stroki.mts.ru",
-            "t-mobile.ru",
-            "t2.ru",
-            "tass.ru",
-            "taxi-maximum.com",
-            "taxi.yandex.ru",
-            "taximaxim.ru",
-            "tensor.ru",
-            "ticketland.ru",
-            "tns-e.ru",
-            "tnt-online.ru",
-            "topdelivery.ru",
-            "travel.yandex.ru",
-            "travel2moscow.com",
-            "travelrussia.ru",
-            "tutu.ru",
-            "tv3.ru",
-            "tvc.ru",
-            "tvoyhod.ru",
-            "urentbike.ru",
-            "userapi.com",
-            "vedomosti.ru",
-            "vgtrk.com",
-            "vitrina.tv",
-            "vk.com",
-            "vk.me",
-            "vk.ru",
-            "vk.team",
-            "vkmusic.ru",
-            "vkplay.ru",
-            "vkusno-i-tochka.ru",
-            "vkusvill.ru",
-            "vkvideo.ru",
-            "vmeste-rf.tv",
-            "vtb.ru",
-            "vybory.gov.ru",
-            "wildberries.ru",
-            "x5.ru",
-            "x5group.ru",
-            "x5tech.ru",
-            "xn--80ajghhoc2aj1c8b.xn--p1ai",
-            "xn--b1agvbfco4a.xn--p1ai",
-            "xn--e1afmapc.xn--p1ai",
-            "xn--e1afmkfd.xn--p1ai",
-            "xn--l1aeji.xn--p1ai",
-            "ya.ru",
-            "yago.yandex.ru",
-            "yandex-team.ru",
-            "yandex.com",
-            "yandex.net",
-            "yandex.ru",
-            "yandexcloud.net",
-            "yandexdatahub.ru",
-            "yandexpro.ru",
-            "yastatic.net",
-            "zvezdatv.ru"
-          ],
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "protocol": ["bittorrent"],
-          "outboundTag": "direct"
-        },
-        {
-          "ip": ["geoip:private"],
-          "type": "field",
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "domain": ["geosite:private"],
-          "outboundTag": "direct"
-        }
-      ],
-      "domainStrategy": "IPIfNonMatch"
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "port": 10808,
-        "listen": "127.0.0.1",
-        "protocol": "socks",
-        "settings": {
-          "udp": true
-        },
-        "sniffing": {
-          "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
-        }
-      },
-      {
-        "tag": "http",
-        "port": 10809,
-        "listen": "127.0.0.1",
-        "protocol": "http",
-        "sniffing": {
-          "enabled": true,
-          "destOverride": ["http", "tls", "quic"]
-        }
-      }
-    ],
-    "outbounds": [
-      {
-        "tag": "proxy",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "46.243.142.12",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "fa9c9f0f-a89c-0005-95d6-a8b47311a6d6",
-                  "encryption": "none",
-                  "flow": ""
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "rutube.ru",
-            "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
-            "shortId": "43dcff53849b81e6",
-            "fingerprint": "firefox"
-          }
-        }
-      },
-      {
-        "tag": "direct",
-        "protocol": "freedom"
-      },
-      {
-        "tag": "block",
-        "protocol": "blackhole"
-      }
-    ],
-    "remarks": "🇹🇷 Турция 3"
+    "remarks": "🇪🇺 Европа 2 ⚡"
   }
 ]
