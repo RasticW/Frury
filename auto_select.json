@@ -1,0 +1,1332 @@
+{
+  "remarks": "🌐 Авто-Выбор",
+  "dns": {
+    "tag": "dns-inbound",
+    "servers": [
+      "https://8.8.8.8/dns-query",
+      "https://8.8.4.4/dns-query",
+      "https://1.1.1.1/dns-query",
+      "https://1.0.0.1/dns-query"
+    ],
+    "queryStrategy": "UseIPv4"
+  },
+  "log": {
+    "loglevel": "warning"
+  },
+  "stats": {},
+  "policy": {
+    "levels": {
+      "8": {
+        "connIdle": 600,
+        "handshake": 4,
+        "uplinkOnly": 1,
+        "downlinkOnly": 1
+      }
+    },
+    "system": {
+      "statsOutboundUplink": true,
+      "statsOutboundDownlink": true
+    }
+  },
+  "routing": {
+    "rules": [
+      {
+        "port": 53,
+        "type": "field",
+        "outboundTag": "dns-out"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:torrent"
+        ],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:google-play",
+          "geosite:github",
+          "geosite:twitch-ads",
+          "geosite:youtube",
+          "geosite:telegram"
+        ],
+        "balancerTag": "auto-balancer"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:private",
+          "geosite:category-ru",
+          "geosite:whitelist",
+          "geosite:microsoft",
+          "geosite:apple",
+          "geosite:epicgames",
+          "geosite:riot",
+          "geosite:escapefromtarkov",
+          "geosite:steam",
+          "geosite:twitch",
+          "geosite:pinterest",
+          "geosite:faceit"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "protocol": [
+          "bittorrent"
+        ],
+        "outboundTag": "block"
+      },
+      {
+        "ip": [
+          "geoip:private",
+          "geoip:direct"
+        ],
+        "type": "field",
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "ozon.ru",
+          "ozon.com"
+        ],
+        "balancerTag": "auto-balancer"
+      },
+      {
+        "type": "field",
+        "network": "tcp,udp",
+        "balancerTag": "auto-balancer"
+      }
+    ],
+    "balancers": [
+      {
+        "tag": "auto-balancer",
+        "selector": [
+          "auto-0-nl-proxy-1",
+          "auto-0-nl-proxy-2",
+          "auto-0-nl-proxy-3",
+          "auto-0-nl-proxy-4",
+          "auto-0-nl-proxy-5",
+          "auto-0-nl-proxy-6",
+          "auto-0-nl-proxy-7",
+          "auto-0-nl-proxy-8",
+          "auto-0-nl-proxy-9",
+          "auto-0-nl-proxy-10",
+          "auto-0-nl-proxy-11",
+          "auto-0-nl-proxy-12",
+          "auto-0-nl-proxy-13",
+          "auto-0-nl-proxy-14",
+          "auto-0-nl-proxy-15",
+          "auto-0-nl-proxy-16",
+          "auto-0-nl-proxy-17",
+          "auto-0-nl-proxy-18",
+          "auto-0-nl-proxy-19",
+          "auto-0-nl-proxy-20",
+          "auto-1-proxy",
+          "auto-1-proxy-2",
+          "auto-1-proxy-3",
+          "auto-1-proxy-4",
+          "auto-1-proxy-5",
+          "auto-1-proxy-6",
+          "auto-2-node-2-",
+          "auto-2-node-2--2",
+          "auto-2-node-2--3",
+          "auto-2-node-2--4",
+          "auto-2-node-2--5",
+          "auto-3-node-2-"
+        ],
+        "strategy": {
+          "type": "leastLoad",
+          "settings": {
+            "maxRTT": "5s",
+            "expected": 2,
+            "baselines": [
+              "200ms",
+              "500ms",
+              "1000ms"
+            ],
+            "tolerance": 0.5
+          }
+        },
+        "fallbackTag": "direct"
+      }
+    ],
+    "domainMatcher": "hybrid",
+    "domainStrategy": "IPIfNonMatch"
+  },
+  "inbounds": [
+    {
+      "tag": "socks",
+      "port": 10808,
+      "listen": "127.0.0.1",
+      "protocol": "socks",
+      "settings": {
+        "udp": true,
+        "auth": "noauth",
+        "userLevel": 8
+      },
+      "sniffing": {
+        "enabled": true,
+        "routeOnly": true,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ]
+      }
+    },
+    {
+      "tag": "http",
+      "port": 10809,
+      "listen": "127.0.0.1",
+      "protocol": "http",
+      "settings": {
+        "userLevel": 8,
+        "allowTransparent": false
+      },
+      "sniffing": {
+        "enabled": true,
+        "routeOnly": true,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ]
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "auto-0-nl-proxy-1",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "images.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "api.v2.ApiService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "images.onetimeok.com",
+          "publicKey": "CQhnOxCj9UuA67kiDGGOcXB1G_XayWfHyhmlWGeG4Uw",
+          "shortId": "cfb882e7dcf03ef2",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-2",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "api.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "api.v2.ApiService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "api.onetimeok.com",
+          "publicKey": "CQhnOxCj9UuA67kiDGGOcXB1G_XayWfHyhmlWGeG4Uw",
+          "shortId": "cfb882e7dcf03ef2",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-3",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "get.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "api.v2.ApiService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "get.onetimeok.com",
+          "publicKey": "CQhnOxCj9UuA67kiDGGOcXB1G_XayWfHyhmlWGeG4Uw",
+          "shortId": "cfb882e7dcf03ef2",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-4",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "content.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "app.v1.StreamService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "content.onetimeok.com",
+          "publicKey": "nhw3l7ERW8NoAh5lBv3dxkF-mkNYifxsSxX_HNiOhAU",
+          "shortId": "82674cbe556a1209",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-5",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "upload.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "app.v1.StreamService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "upload.onetimeok.com",
+          "publicKey": "nhw3l7ERW8NoAh5lBv3dxkF-mkNYifxsSxX_HNiOhAU",
+          "shortId": "82674cbe556a1209",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-6",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "feed.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "app.v1.StreamService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "feed.onetimeok.com",
+          "publicKey": "nhw3l7ERW8NoAh5lBv3dxkF-mkNYifxsSxX_HNiOhAU",
+          "shortId": "82674cbe556a1209",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-7",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "edge1.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "edge.v2.RelayService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "edge1.onetimeok.com",
+          "publicKey": "TLAYLGGk8xnADNCg4_7-E3YqlC8L4lVo4m7aauBL7kU",
+          "shortId": "ce7d5b58da528cf1",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-8",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "gateway.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "edge.v2.RelayService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "gateway.onetimeok.com",
+          "publicKey": "TLAYLGGk8xnADNCg4_7-E3YqlC8L4lVo4m7aauBL7kU",
+          "shortId": "ce7d5b58da528cf1",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-9",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "static.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "edge.v2.RelayService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "static.onetimeok.com",
+          "publicKey": "TLAYLGGk8xnADNCg4_7-E3YqlC8L4lVo4m7aauBL7kU",
+          "shortId": "ce7d5b58da528cf1",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-10",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "core.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "media.v1.ObjectService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "core.onetimeok.com",
+          "publicKey": "8QJSXd0F3JScfRiyQFh_IXYq8Liwpa9EzhbC1MDRrnc",
+          "shortId": "8e4d75390b1e0547",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-11",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "us.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "media.v1.ObjectService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "us.onetimeok.com",
+          "publicKey": "8QJSXd0F3JScfRiyQFh_IXYq8Liwpa9EzhbC1MDRrnc",
+          "shortId": "8e4d75390b1e0547",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-12",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "media.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "media.v1.ObjectService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "media.onetimeok.com",
+          "publicKey": "8QJSXd0F3JScfRiyQFh_IXYq8Liwpa9EzhbC1MDRrnc",
+          "shortId": "8e4d75390b1e0547",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-13",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "grid.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "gw.v1.MetricsService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "grid.onetimeok.com",
+          "publicKey": "28oR3ji9c2CneMNkbvcDL8WfvNWHS3GfA3RdtaF-pSg",
+          "shortId": "89e97b6542785ca6",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-14",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "assets.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "gw.v1.MetricsService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "assets.onetimeok.com",
+          "publicKey": "28oR3ji9c2CneMNkbvcDL8WfvNWHS3GfA3RdtaF-pSg",
+          "shortId": "89e97b6542785ca6",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-15",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "sync.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "gw.v1.MetricsService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "sync.onetimeok.com",
+          "publicKey": "28oR3ji9c2CneMNkbvcDL8WfvNWHS3GfA3RdtaF-pSg",
+          "shortId": "89e97b6542785ca6",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-16",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "dl.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "api.v2.PushService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "dl.onetimeok.com",
+          "publicKey": "4o20JlNKKsAzSGEvEMw6g1A8Ij37tiSU1CFwTZI4b3o",
+          "shortId": "8ba32e7cefbf524a",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-17",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "stream.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "api.v2.PushService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "stream.onetimeok.com",
+          "publicKey": "4o20JlNKKsAzSGEvEMw6g1A8Ij37tiSU1CFwTZI4b3o",
+          "shortId": "8ba32e7cefbf524a",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-18",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "hub.onetimeok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "api.v2.PushService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "hub.onetimeok.com",
+          "publicKey": "4o20JlNKKsAzSGEvEMw6g1A8Ij37tiSU1CFwTZI4b3o",
+          "shortId": "8ba32e7cefbf524a",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-19",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "46.243.142.121",
+            "port": 8443,
+            "users": [
+              {
+                "id": "a3a34b58-14b4-41cb-a555-8752f7694916",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "rutube.ru",
+          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+          "shortId": "43dcff53849b81e6",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-0-nl-proxy-20",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "46.243.142.121",
+            "port": 8443,
+            "users": [
+              {
+                "id": "a3a34b58-14b4-41cb-a555-8752f7694916",
+                "encryption": "none",
+                "flow": "xtls-rprx-vision"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "rutube.ru",
+          "publicKey": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+          "shortId": "43dcff53849b81e6",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-1-proxy",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "stream.oneoneok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "api.v1.StreamService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "stream.oneoneok.com",
+          "publicKey": "WcuRWNWWu4B4Eddf3uradKhm1_XYGiyHr3xnja7zeSE",
+          "shortId": "ae3966417b221271",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-1-proxy-2",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "relay.oneoneok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "api.v1.StreamService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "relay.oneoneok.com",
+          "publicKey": "Bo6VOZzJ5Z9w328L1F1sQzlzLNbiIpuWbV021xPltxE",
+          "shortId": "cd40e7dbd53a28ce",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-1-proxy-3",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "net.oneoneok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "api.v1.StreamService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "net.oneoneok.com",
+          "publicKey": "fl73IBnFC9oaLCgTZkYWoCS9gbintk3TxHnKiE20Nk8",
+          "shortId": "62b68b9d30622133",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-1-proxy-4",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "static.oneoneok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "api.v1.StreamService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "static.oneoneok.com",
+          "publicKey": "oVbonPGBPZ_qGyhHPe-LwsyPc0oobby2YknsPE90iRo",
+          "shortId": "0b46e0908285b078",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-1-proxy-5",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "api.oneoneok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "api.v1.StreamService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "api.oneoneok.com",
+          "publicKey": "4EY4k0Ush0fOcMCMbbx4qPv5OBXswb77LGN6wH8axSA",
+          "shortId": "5747aafd6c68484a",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-1-proxy-6",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "cache.oneoneok.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "serviceName": "api.v1.StreamService",
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "cache.oneoneok.com",
+          "publicKey": "4kJSkxtJWTweNdJngXxrbJw6CoIDo-Sfs7O0jhhOkXc",
+          "shortId": "687664dda12b706f",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-2-node-2-",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "37.9.4.77",
+            "port": 10065,
+            "users": [
+              {
+                "id": "e46c4448-c932-000b-9ebc-5e6bd4eb51a6",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "max.ru",
+          "publicKey": "VbHm0VbqW1992faNSxDoh_zEfoBkpifWUudV8mf5y3M",
+          "shortId": "226509f017e4c36d",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-2-node-2--2",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "37.9.4.77",
+            "port": 10065,
+            "users": [
+              {
+                "id": "e46c4448-c932-000c-9ebc-5e6bd4eb51a6",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "max.ru",
+          "publicKey": "VbHm0VbqW1992faNSxDoh_zEfoBkpifWUudV8mf5y3M",
+          "shortId": "226509f017e4c36d",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-2-node-2--3",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "37.9.4.77",
+            "port": 10065,
+            "users": [
+              {
+                "id": "e46c4448-c932-000e-9ebc-5e6bd4eb51a6",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "max.ru",
+          "publicKey": "VbHm0VbqW1992faNSxDoh_zEfoBkpifWUudV8mf5y3M",
+          "shortId": "226509f017e4c36d",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-2-node-2--4",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "37.9.4.77",
+            "port": 10065,
+            "users": [
+              {
+                "id": "e46c4448-c932-000f-9ebc-5e6bd4eb51a6",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "max.ru",
+          "publicKey": "VbHm0VbqW1992faNSxDoh_zEfoBkpifWUudV8mf5y3M",
+          "shortId": "226509f017e4c36d",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-2-node-2--5",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "37.9.4.77",
+            "port": 10065,
+            "users": [
+              {
+                "id": "e46c4448-c932-0010-9ebc-5e6bd4eb51a6",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "max.ru",
+          "publicKey": "VbHm0VbqW1992faNSxDoh_zEfoBkpifWUudV8mf5y3M",
+          "shortId": "226509f017e4c36d",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "auto-3-node-2-",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "37.9.4.77",
+            "port": 10065,
+            "users": [
+              {
+                "id": "e46c4448-c932-000c-9ebc-5e6bd4eb51a6",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {
+          "authority": "",
+          "mode": false
+        },
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "max.ru",
+          "publicKey": "VbHm0VbqW1992faNSxDoh_zEfoBkpifWUudV8mf5y3M",
+          "shortId": "226509f017e4c36d",
+          "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "direct",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIP"
+      }
+    },
+    {
+      "tag": "block",
+      "protocol": "blackhole"
+    },
+    {
+      "tag": "dns-out",
+      "protocol": "dns"
+    }
+  ],
+  "burstObservatory": {
+    "pingConfig": {
+      "timeout": "5s",
+      "interval": "30s",
+      "sampling": 5,
+      "destination": "http://connectivitycheck.gstatic.com/generate_204",
+      "connectivity": "http://connectivitycheck.gstatic.com/generate_204"
+    },
+    "subjectSelector": [
+      "auto-0-nl-proxy-1",
+      "auto-0-nl-proxy-2",
+      "auto-0-nl-proxy-3",
+      "auto-0-nl-proxy-4",
+      "auto-0-nl-proxy-5",
+      "auto-0-nl-proxy-6",
+      "auto-0-nl-proxy-7",
+      "auto-0-nl-proxy-8",
+      "auto-0-nl-proxy-9",
+      "auto-0-nl-proxy-10",
+      "auto-0-nl-proxy-11",
+      "auto-0-nl-proxy-12",
+      "auto-0-nl-proxy-13",
+      "auto-0-nl-proxy-14",
+      "auto-0-nl-proxy-15",
+      "auto-0-nl-proxy-16",
+      "auto-0-nl-proxy-17",
+      "auto-0-nl-proxy-18",
+      "auto-0-nl-proxy-19",
+      "auto-0-nl-proxy-20",
+      "auto-1-proxy",
+      "auto-1-proxy-2",
+      "auto-1-proxy-3",
+      "auto-1-proxy-4",
+      "auto-1-proxy-5",
+      "auto-1-proxy-6",
+      "auto-2-node-2-",
+      "auto-2-node-2--2",
+      "auto-2-node-2--3",
+      "auto-2-node-2--4",
+      "auto-2-node-2--5",
+      "auto-3-node-2-"
+    ]
+  }
+}
