@@ -38,36 +38,99 @@
       {
         "type": "field",
         "domain": [
-          "geosite:torrent"
+          "torrent",
+          "thepiratebay",
+          "1337x",
+          "rutracker",
+          "nnm-club",
+          "kinozal",
+          "rutor",
+          "fast-torrent",
+          "megapeer",
+          "tapochek"
         ],
         "outboundTag": "block"
       },
       {
         "type": "field",
+        "port": "6881-6889,51413,21413,17417,37305",
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
         "domain": [
-          "geosite:google-play",
-          "geosite:github",
-          "geosite:twitch-ads",
-          "geosite:youtube",
-          "geosite:telegram"
+          "googleapis.com",
+          "android.googleapis.com",
+          "play.googleapis.com",
+          "youtube.com",
+          "youtu.be",
+          "googlevideo.com",
+          "ytimg.com",
+          "telegram.org",
+          "t.me",
+          "telega.one",
+          "tg.dev",
+          "github.com",
+          "githubusercontent.com",
+          "githubassets.com",
+          "twitch.tv",
+          "ttvnw.net",
+          "jtvnw.net"
         ],
         "balancerTag": "auto-balancer"
       },
       {
         "type": "field",
         "domain": [
-          "geosite:private",
-          "geosite:category-ru",
-          "geosite:whitelist",
-          "geosite:microsoft",
-          "geosite:apple",
-          "geosite:epicgames",
-          "geosite:riot",
-          "geosite:escapefromtarkov",
-          "geosite:steam",
-          "geosite:twitch",
-          "geosite:pinterest",
-          "geosite:faceit"
+          "localhost",
+          "127.0.0.1",
+          "192.168.",
+          "10.",
+          "172.16.",
+          "yandex.ru",
+          "ya.ru",
+          "yandex.net",
+          "vk.com",
+          "mail.ru",
+          "ok.ru",
+          "avito.ru",
+          "wildberries.ru",
+          "ozon.ru",
+          "ozon.com",
+          "sberbank.ru",
+          "tinkoff.ru",
+          "gosuslugi.ru",
+          "mos.ru",
+          "kontur.ru",
+          "diadoc.kontur.ru",
+          "skbkontur.ru",
+          "microsoft.com",
+          "live.com",
+          "office.com",
+          "outlook.com",
+          "windowsupdate.com",
+          "msn.com",
+          "bing.com",
+          "hotmail.com",
+          "apple.com",
+          "icloud.com",
+          "me.com",
+          "mzstatic.com",
+          "steampowered.com",
+          "steamcommunity.com",
+          "steamgames.com",
+          "epicgames.com",
+          "unrealengine.com",
+          "fortnite.com",
+          "riotgames.com",
+          "valorant.com",
+          "leagueoflegends.com",
+          "escapefromtarkov.com",
+          "battlestategames.com",
+          "pinterest.com",
+          "pinimg.com",
+          "faceit.com",
+          "faceitcdn.net"
         ],
         "outboundTag": "direct"
       },
@@ -104,13 +167,13 @@
       {
         "tag": "auto-balancer",
         "selector": [
-          "se-proxy-1",
+          "se-proxy",
           "se-proxy-2",
           "se-proxy-3",
           "se-proxy-4",
           "se-proxy-5",
           "se-proxy-6",
-          "nl-proxy-1",
+          "nl-proxy",
           "nl-proxy-2",
           "nl-proxy-3",
           "nl-proxy-4",
@@ -128,13 +191,13 @@
           "nl-proxy-16",
           "nl-proxy-17",
           "nl-proxy-18",
-          "uk-proxy-1",
+          "uk-proxy",
           "uk-proxy-2",
           "uk-proxy-3",
           "uk-proxy-4",
           "uk-proxy-5",
           "uk-proxy-6",
-          "fr-proxy-1",
+          "fr-proxy",
           "fr-proxy-2",
           "fr-proxy-3",
           "fr-proxy-4",
@@ -175,7 +238,7 @@
       {
         "tag": "france-balancer",
         "selector": [
-          "fr-proxy-1",
+          "fr-proxy",
           "fr-proxy-2",
           "fr-proxy-3",
           "fr-proxy-4",
@@ -236,7 +299,7 @@
       {
         "tag": "uk-balancer",
         "selector": [
-          "uk-proxy-1",
+          "uk-proxy",
           "uk-proxy-2",
           "uk-proxy-3",
           "uk-proxy-4",
@@ -262,7 +325,7 @@
       {
         "tag": "sweden-balancer",
         "selector": [
-          "se-proxy-1",
+          "se-proxy",
           "se-proxy-2",
           "se-proxy-3",
           "se-proxy-4",
@@ -288,7 +351,7 @@
       {
         "tag": "netherlands-balancer",
         "selector": [
-          "nl-proxy-1",
+          "nl-proxy",
           "nl-proxy-2",
           "nl-proxy-3",
           "nl-proxy-4",
@@ -370,7 +433,49 @@
   ],
   "outbounds": [
     {
-      "tag": "se-proxy-1",
+      "tag": "🌐 Авто-Выбор",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIP"
+      }
+    },
+    {
+      "tag": "🇸🇪 Швеция",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIP"
+      }
+    },
+    {
+      "tag": "🇳🇱 Нидерланды",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIP"
+      }
+    },
+    {
+      "tag": "🇬🇧 Великобритания",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIP"
+      }
+    },
+    {
+      "tag": "🇫🇷 Франция",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIP"
+      }
+    },
+    {
+      "tag": "🇺🇸 США",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIP"
+      }
+    },
+    {
+      "tag": "se-proxy",
       "protocol": "vless",
       "settings": {
         "vnext": [
@@ -605,7 +710,7 @@
         },
         "security": "reality"
       },
-      "tag": "nl-proxy-1"
+      "tag": "nl-proxy"
     },
     {
       "protocol": "vless",
@@ -1218,7 +1323,7 @@
           "serverName": "edge1.numberoneok.com"
         }
       },
-      "tag": "uk-proxy-1"
+      "tag": "uk-proxy"
     },
     {
       "protocol": "vless",
@@ -1428,7 +1533,7 @@
           "serverName": "fr17.univesalsrv.com"
         }
       },
-      "tag": "fr-proxy-1"
+      "tag": "fr-proxy"
     },
     {
       "protocol": "vless",
@@ -2243,13 +2348,13 @@
       "timeout": "3s"
     },
     "subjectSelector": [
-      "se-proxy-1",
+      "se-proxy",
       "se-proxy-2",
       "se-proxy-3",
       "se-proxy-4",
       "se-proxy-5",
       "se-proxy-6",
-      "nl-proxy-1",
+      "nl-proxy",
       "nl-proxy-2",
       "nl-proxy-3",
       "nl-proxy-4",
@@ -2267,13 +2372,13 @@
       "nl-proxy-16",
       "nl-proxy-17",
       "nl-proxy-18",
-      "uk-proxy-1",
+      "uk-proxy",
       "uk-proxy-2",
       "uk-proxy-3",
       "uk-proxy-4",
       "uk-proxy-5",
       "uk-proxy-6",
-      "fr-proxy-1",
+      "fr-proxy",
       "fr-proxy-2",
       "fr-proxy-3",
       "fr-proxy-4",
@@ -2298,13 +2403,13 @@
   },
   "observatory": {
     "subjectSelector": [
-      "se-proxy-1",
+      "se-proxy",
       "se-proxy-2",
       "se-proxy-3",
       "se-proxy-4",
       "se-proxy-5",
       "se-proxy-6",
-      "nl-proxy-1",
+      "nl-proxy",
       "nl-proxy-2",
       "nl-proxy-3",
       "nl-proxy-4",
@@ -2322,13 +2427,13 @@
       "nl-proxy-16",
       "nl-proxy-17",
       "nl-proxy-18",
-      "uk-proxy-1",
+      "uk-proxy",
       "uk-proxy-2",
       "uk-proxy-3",
       "uk-proxy-4",
       "uk-proxy-5",
       "uk-proxy-6",
-      "fr-proxy-1",
+      "fr-proxy",
       "fr-proxy-2",
       "fr-proxy-3",
       "fr-proxy-4",
