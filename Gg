@@ -1,4 +1,3 @@
-
 [
   {
     "remarks": "🇪🇺 Авто-выбор | запасной",
@@ -273,9 +272,6 @@
       "subjectSelector": [
         "proxy"
       ]
-    },
-    "meta": {
-      "serverDescription": "| Скорость | 🌕🌕🌕🌕🌑"
     }
   },
   {
@@ -678,10 +674,7 @@
           }
         }
       }
-    ],
-    "meta": {
-      "serverDescription": "| Скорость | 🌕🌕🌕🌕🌕"
-    }
+    ]
   },
   {
     "remarks": "🇷🇺 Ютуб без рекламы",
@@ -797,9 +790,6 @@
         "tag": "block",
         "protocol": "blackhole"
       }
-    ],
-    "meta": {
-      "serverDescription": "| Скорость | 🌕🌕🌕🌗🌑"
-    }
+    ]
   }
 ]
