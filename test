@@ -1,2461 +1,679 @@
-{
-  "remarks": "🌐 Авто-Выбор",
-  "dns": {
-    "tag": "dns-inbound",
-    "servers": [
-      "https://8.8.8.8/dns-query",
-      "https://8.8.4.4/dns-query",
-      "https://1.1.1.1/dns-query",
-      "https://1.0.0.1/dns-query"
-    ],
-    "queryStrategy": "UseIPv4"
-  },
-  "log": {
-    "loglevel": "warning"
-  },
-  "stats": {},
-  "policy": {
-    "levels": {
-      "8": {
-        "connIdle": 600,
-        "handshake": 4,
-        "uplinkOnly": 1,
-        "downlinkOnly": 1
-      }
+[
+  {
+    "remarks": "🇪🇺 Авто-выбор | Быстрый WI-FI",
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "1.0.0.1"
+      ],
+      "queryStrategy": "UseIP"
     },
-    "system": {
-      "statsOutboundUplink": true,
-      "statsOutboundDownlink": true
-    }
-  },
-  "routing": {
-    "rules": [
+    "routing": {
+      "rules": [
+        {
+          "type": "field",
+          "protocol": [
+            "bittorrent"
+          ],
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "balancerTag": "Super_Balancer"
+        }
+      ],
+      "balancers": [
+        {
+          "tag": "Super_Balancer",
+          "selector": [
+            "proxy"
+          ],
+          "strategy": {
+            "type": "leastLoad",
+            "settings": {
+              "maxRTT": "1500ms",
+              "expected": 2,
+              "baselines": [
+                "600ms",
+                "900ms"
+              ],
+              "tolerance": 0.3
+            }
+          },
+          "fallbackTag": "direct"
+        }
+      ],
+      "domainMatcher": "hybrid",
+      "domainStrategy": "IPIfNonMatch"
+    },
+    "inbounds": [
       {
-        "port": 53,
-        "type": "field",
-        "outboundTag": "dns-out"
+        "tag": "socks",
+        "port": 10808,
+        "listen": "127.0.0.1",
+        "protocol": "socks",
+        "settings": {
+          "udp": true,
+          "auth": "noauth"
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": false,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
+        }
       },
       {
-        "type": "field",
-        "domain": [
-          "torrent",
-          "thepiratebay",
-          "1337x",
-          "rutracker",
-          "nnm-club",
-          "kinozal",
-          "rutor",
-          "fast-torrent",
-          "megapeer",
-          "tapochek"
-        ],
-        "outboundTag": "block"
-      },
-      {
-        "type": "field",
-        "port": "6881-6889,51413,21413,17417,37305",
-        "outboundTag": "block"
-      },
-      {
-        "type": "field",
-        "domain": [
-          "googleapis.com",
-          "android.googleapis.com",
-          "play.googleapis.com",
-          "youtube.com",
-          "youtu.be",
-          "googlevideo.com",
-          "ytimg.com",
-          "telegram.org",
-          "t.me",
-          "telega.one",
-          "tg.dev",
-          "github.com",
-          "githubusercontent.com",
-          "githubassets.com",
-          "twitch.tv",
-          "ttvnw.net",
-          "jtvnw.net"
-        ],
-        "balancerTag": "auto-balancer"
-      },
-      {
-        "type": "field",
-        "domain": [
-          "localhost",
-          "127.0.0.1",
-          "192.168.",
-          "10.",
-          "172.16.",
-          "yandex.ru",
-          "ya.ru",
-          "yandex.net",
-          "vk.com",
-          "mail.ru",
-          "ok.ru",
-          "avito.ru",
-          "wildberries.ru",
-          "ozon.ru",
-          "ozon.com",
-          "sberbank.ru",
-          "tinkoff.ru",
-          "gosuslugi.ru",
-          "mos.ru",
-          "kontur.ru",
-          "diadoc.kontur.ru",
-          "skbkontur.ru",
-          "microsoft.com",
-          "live.com",
-          "office.com",
-          "outlook.com",
-          "windowsupdate.com",
-          "msn.com",
-          "bing.com",
-          "hotmail.com",
-          "apple.com",
-          "icloud.com",
-          "me.com",
-          "mzstatic.com",
-          "steampowered.com",
-          "steamcommunity.com",
-          "steamgames.com",
-          "epicgames.com",
-          "unrealengine.com",
-          "fortnite.com",
-          "riotgames.com",
-          "valorant.com",
-          "leagueoflegends.com",
-          "escapefromtarkov.com",
-          "battlestategames.com",
-          "pinterest.com",
-          "pinimg.com",
-          "faceit.com",
-          "faceitcdn.net"
-        ],
-        "outboundTag": "direct"
-      },
-      {
-        "type": "field",
-        "protocol": [
-          "bittorrent"
-        ],
-        "outboundTag": "block"
-      },
-      {
-        "ip": [
-          "geoip:private",
-          "geoip:direct"
-        ],
-        "type": "field",
-        "outboundTag": "direct"
-      },
-      {
-        "type": "field",
-        "domain": [
-          "ozon.ru",
-          "ozon.com"
-        ],
-        "balancerTag": "auto-balancer"
-      },
-      {
-        "type": "field",
-        "network": "tcp,udp",
-        "balancerTag": "auto-balancer"
+        "tag": "http",
+        "port": 10809,
+        "listen": "127.0.0.1",
+        "protocol": "http",
+        "settings": {
+          "allowTransparent": false
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": false,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
+        }
       }
     ],
-    "balancers": [
+    "outbounds": [
       {
-        "tag": "auto-balancer",
-        "selector": [
-          "se-proxy",
-          "se-proxy-2",
-          "se-proxy-3",
-          "se-proxy-4",
-          "se-proxy-5",
-          "se-proxy-6",
-          "nl-proxy",
-          "nl-proxy-2",
-          "nl-proxy-3",
-          "nl-proxy-4",
-          "nl-proxy-5",
-          "nl-proxy-6",
-          "nl-proxy-7",
-          "nl-proxy-8",
-          "nl-proxy-9",
-          "nl-proxy-10",
-          "nl-proxy-11",
-          "nl-proxy-12",
-          "nl-proxy-13",
-          "nl-proxy-14",
-          "nl-proxy-15",
-          "nl-proxy-16",
-          "nl-proxy-17",
-          "nl-proxy-18",
-          "uk-proxy",
-          "uk-proxy-2",
-          "uk-proxy-3",
-          "uk-proxy-4",
-          "uk-proxy-5",
-          "uk-proxy-6",
-          "fr-proxy",
-          "fr-proxy-2",
-          "fr-proxy-3",
-          "fr-proxy-4",
-          "fr-proxy-5",
-          "fr-proxy-6",
-          "fr-proxy-7",
-          "fr-proxy-8",
-          "fr-proxy-9",
-          "fr-proxy-10",
-          "fr-proxy-11",
-          "fr-proxy-12",
-          "fr-proxy-13",
-          "fr-proxy-14",
-          "fr-proxy-15",
-          "fr-proxy-16",
-          "fr-proxy-17",
-          "fr-proxy-18",
-          "fr-proxy-19",
-          "fr-proxy-20",
-          "my-proxy-1"
-        ],
-        "strategy": {
-          "type": "leastLoad",
-          "settings": {
-            "maxRTT": "3s",
-            "expected": 3,
-            "baselines": [
-              "100ms",
-              "300ms",
-              "600ms",
-              "1000ms"
-            ],
-            "tolerance": 0.3
-          }
+        "tag": "proxy",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "217.60.24.57",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "51d0ac89-8e1a-4cd8-91bf-246deb124ac8",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
         },
-        "fallbackTag": "direct"
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "cdn.shopify.com",
+            "publicKey": "NI5Rkfn6zO_gF-UC1nuvJwu4SDakCXh3ygJOKU1EITU",
+            "shortId": "f747a7a5793b5714",
+            "fingerprint": "firefox"
+          }
+        }
       },
       {
-        "tag": "france-balancer",
-        "selector": [
-          "fr-proxy",
-          "fr-proxy-2",
-          "fr-proxy-3",
-          "fr-proxy-4",
-          "fr-proxy-5",
-          "fr-proxy-6",
-          "fr-proxy-7",
-          "fr-proxy-8",
-          "fr-proxy-9",
-          "fr-proxy-10",
-          "fr-proxy-11",
-          "fr-proxy-12",
-          "fr-proxy-13",
-          "fr-proxy-14",
-          "fr-proxy-15",
-          "fr-proxy-16",
-          "fr-proxy-17",
-          "fr-proxy-18",
-          "fr-proxy-19",
-          "fr-proxy-20"
-        ],
-        "strategy": {
-          "type": "leastLoad",
-          "settings": {
-            "maxRTT": "3s",
-            "expected": 2,
-            "baselines": [
-              "100ms",
-              "300ms",
-              "600ms",
-              "1000ms"
-            ],
-            "tolerance": 0.3
-          }
+        "tag": "proxy-2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "217.60.24.61",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "51d0ac89-8e1a-4cd8-91bf-246deb124ac8",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
         },
-        "fallbackTag": "auto-balancer"
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "cdn.shopify.com",
+            "publicKey": "NI5Rkfn6zO_gF-UC1nuvJwu4SDakCXh3ygJOKU1EITU",
+            "shortId": "f747a7a5793b5714",
+            "fingerprint": "firefox"
+          }
+        }
       },
       {
-        "tag": "usa-balancer",
-        "selector": [
-          "my-proxy-1"
-        ],
-        "strategy": {
-          "type": "leastLoad",
-          "settings": {
-            "maxRTT": "3s",
-            "expected": 1,
-            "baselines": [
-              "100ms",
-              "300ms",
-              "600ms",
-              "1000ms"
-            ],
-            "tolerance": 0.3
-          }
+        "tag": "proxy-3",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "217.60.23.154",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "51d0ac89-8e1a-4cd8-91bf-246deb124ac8",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
         },
-        "fallbackTag": "auto-balancer"
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "cdn.shopify.com",
+            "publicKey": "NI5Rkfn6zO_gF-UC1nuvJwu4SDakCXh3ygJOKU1EITU",
+            "shortId": "f747a7a5793b5714",
+            "fingerprint": "firefox"
+          }
+        }
       },
       {
-        "tag": "uk-balancer",
-        "selector": [
-          "uk-proxy",
-          "uk-proxy-2",
-          "uk-proxy-3",
-          "uk-proxy-4",
-          "uk-proxy-5",
-          "uk-proxy-6"
-        ],
-        "strategy": {
-          "type": "leastLoad",
-          "settings": {
-            "maxRTT": "3s",
-            "expected": 2,
-            "baselines": [
-              "100ms",
-              "300ms",
-              "600ms",
-              "1000ms"
-            ],
-            "tolerance": 0.3
-          }
+        "tag": "proxy-4",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "2.26.122.101",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "51d0ac89-8e1a-4cd8-91bf-246deb124ac8",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
         },
-        "fallbackTag": "auto-balancer"
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "cdn.shopify.com",
+            "publicKey": "NI5Rkfn6zO_gF-UC1nuvJwu4SDakCXh3ygJOKU1EITU",
+            "shortId": "f747a7a5793b5714",
+            "fingerprint": "firefox"
+          }
+        }
       },
       {
-        "tag": "sweden-balancer",
-        "selector": [
-          "se-proxy",
-          "se-proxy-2",
-          "se-proxy-3",
-          "se-proxy-4",
-          "se-proxy-5",
-          "se-proxy-6"
-        ],
-        "strategy": {
-          "type": "leastLoad",
-          "settings": {
-            "maxRTT": "3s",
-            "expected": 2,
-            "baselines": [
-              "100ms",
-              "300ms",
-              "600ms",
-              "1000ms"
-            ],
-            "tolerance": 0.3
-          }
+        "tag": "proxy-5",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "94.183.219.243",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "51d0ac89-8e1a-4cd8-91bf-246deb124ac8",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
         },
-        "fallbackTag": "auto-balancer"
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "cdn.shopify.com",
+            "publicKey": "NI5Rkfn6zO_gF-UC1nuvJwu4SDakCXh3ygJOKU1EITU",
+            "shortId": "f747a7a5793b5714",
+            "fingerprint": "firefox"
+          }
+        }
       },
       {
-        "tag": "netherlands-balancer",
-        "selector": [
-          "nl-proxy",
-          "nl-proxy-2",
-          "nl-proxy-3",
-          "nl-proxy-4",
-          "nl-proxy-5",
-          "nl-proxy-6",
-          "nl-proxy-7",
-          "nl-proxy-8",
-          "nl-proxy-9",
-          "nl-proxy-10",
-          "nl-proxy-11",
-          "nl-proxy-12",
-          "nl-proxy-13",
-          "nl-proxy-14",
-          "nl-proxy-15",
-          "nl-proxy-16",
-          "nl-proxy-17",
-          "nl-proxy-18"
-        ],
-        "strategy": {
-          "type": "leastLoad",
-          "settings": {
-            "maxRTT": "3s",
-            "expected": 2,
-            "baselines": [
-              "100ms",
-              "300ms",
-              "600ms",
-              "1000ms"
-            ],
-            "tolerance": 0.3
-          }
-        },
-        "fallbackTag": "auto-balancer"
+        "tag": "direct",
+        "protocol": "freedom"
+      },
+      {
+        "tag": "block",
+        "protocol": "blackhole"
       }
     ],
-    "domainMatcher": "hybrid",
-    "domainStrategy": "IPIfNonMatch"
+    "burstObservatory": {
+      "pingConfig": {
+        "timeout": "2s",
+        "interval": "60s",
+        "sampling": 6,
+        "destination": "https://connectivitycheck.gstatic.com/generate_204",
+        "connectivity": ""
+      },
+      "subjectSelector": [
+        "proxy"
+      ]
+    }
   },
-  "inbounds": [
-    {
-      "tag": "socks",
-      "port": 10808,
-      "listen": "127.0.0.1",
-      "protocol": "socks",
-      "settings": {
-        "udp": true,
-        "auth": "noauth",
-        "userLevel": 8
-      },
-      "sniffing": {
-        "enabled": true,
-        "routeOnly": true,
-        "destOverride": [
-          "http",
-          "tls",
-          "quic"
-        ]
-      }
+  {
+    "remarks": "🇷🇺 Авто-выбор | RU Direct",
+    "log": {
+      "loglevel": "warning"
     },
-    {
-      "tag": "http",
-      "port": 10809,
-      "listen": "127.0.0.1",
-      "protocol": "http",
-      "settings": {
-        "userLevel": 8,
-        "allowTransparent": false
-      },
-      "sniffing": {
-        "enabled": true,
-        "routeOnly": true,
-        "destOverride": [
-          "http",
-          "tls",
-          "quic"
-        ]
-      }
-    }
-  ],
-  "outbounds": [
-    {
-      "tag": "🌐 Авто-Выбор",
-      "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIP"
-      }
-    },
-    {
-      "tag": "🇸🇪 Швеция",
-      "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIP"
-      }
-    },
-    {
-      "tag": "🇳🇱 Нидерланды",
-      "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIP"
-      }
-    },
-    {
-      "tag": "🇬🇧 Великобритания",
-      "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIP"
-      }
-    },
-    {
-      "tag": "🇫🇷 Франция",
-      "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIP"
-      }
-    },
-    {
-      "tag": "🇺🇸 США",
-      "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIP"
-      }
-    },
-    {
-      "tag": "se-proxy",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "stream.oneoneok.com",
-            "port": 443,
-            "users": [
-              {
-                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
-                "encryption": "none",
-                "flow": ""
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "grpc",
-        "grpcSettings": {
-          "serviceName": "api.v1.StreamService",
-          "authority": "",
-          "mode": false
+    "dns": {
+      "servers": [
+        {
+          "address": "77.88.8.8",
+          "domains": [
+            "domain:ru",
+            "domain:ozon.com",
+            "domain:ozonusercontent.com",
+            "domain:ozon.io",
+            "domain:ozon.travel",
+            "domain:wildberries.ru"
+          ]
         },
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "stream.oneoneok.com",
-          "publicKey": "WcuRWNWWu4B4Eddf3uradKhm1_XYGiyHr3xnja7zeSE",
-          "shortId": "ae3966417b221271",
-          "fingerprint": "firefox"
+        "1.1.1.1"
+      ],
+      "queryStrategy": "UseIPv4"
+    },
+    "routing": {
+      "domainMatcher": "hybrid",
+      "domainStrategy": "AsIs",
+      "balancers": [
+        {
+          "tag": "auto-balance",
+          "selector": [
+            "proxy_"
+          ],
+          "strategy": {
+            "type": "leastPing"
+          }
         }
-      }
-    },
-    {
-      "tag": "se-proxy-2",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "relay.oneoneok.com",
-            "port": 443,
-            "users": [
-              {
-                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
-                "encryption": "none",
-                "flow": ""
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "grpc",
-        "grpcSettings": {
-          "serviceName": "api.v1.StreamService",
-          "authority": "",
-          "mode": false
+      ],
+      "rules": [
+        {
+          "ip": [
+            "geoip:private"
+          ],
+          "type": "field",
+          "outboundTag": "block"
         },
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "relay.oneoneok.com",
-          "publicKey": "Bo6VOZzJ5Z9w328L1F1sQzlzLNbiIpuWbV021xPltxE",
-          "shortId": "cd40e7dbd53a28ce",
-          "fingerprint": "firefox"
+        {
+          "type": "field",
+          "protocol": [
+            "bittorrent"
+          ],
+          "outboundTag": "block"
+        },
+        {
+          "ip": [
+            "77.88.8.8",
+            "77.88.8.1"
+          ],
+          "type": "field",
+          "outboundTag": "direct"
+        },
+        {
+          "ip": [
+            "185.73.192.0/22",
+            "195.34.20.0/23",
+            "46.226.122.0/24",
+            "91.212.64.0/24",
+            "91.223.93.0/24",
+            "154.90.70.0/24",
+            "45.194.67.0/24",
+            "45.194.92.0/24",
+            "45.198.224.0/24",
+            "45.205.1.0/24",
+            "109.197.224.0/21",
+            "109.74.160.0/20",
+            "134.255.128.0/19",
+            "178.217.224.0/21",
+            "185.132.28.0/22",
+            "185.162.204.0/22",
+            "185.2.104.0/22",
+            "185.201.88.0/22",
+            "185.204.156.0/22",
+            "185.214.252.0/22",
+            "185.229.192.0/22",
+            "185.252.228.0/22",
+            "185.59.56.0/22",
+            "185.60.212.0/22",
+            "193.168.176.0/22",
+            "193.46.244.0/22",
+            "194.169.56.0/22",
+            "195.69.136.0/22",
+            "213.109.48.0/20",
+            "217.151.224.0/22",
+            "217.151.232.0/21",
+            "45.131.56.0/22",
+            "46.36.0.0/19",
+            "5.199.192.0/19",
+            "5.43.128.0/19",
+            "82.112.32.0/19",
+            "88.218.212.0/22",
+            "91.193.148.0/22",
+            "91.197.204.0/22",
+            "91.211.20.0/22",
+            "91.223.170.0/24",
+            "91.227.50.0/23",
+            "91.231.196.0/22",
+            "91.235.188.0/22",
+            "93.90.96.0/20",
+            "94.230.128.0/20",
+            "94.230.142.0/23",
+            "95.181.181.0/24"
+          ],
+          "type": "field",
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "domain": [
+            "domain:ru",
+            "domain:audio-ads.spotify.com",
+            "domain:adeventtracker.spotify.com",
+            "domain:ads-fa.spotify.com",
+            "domain:ads-akp.spotify.com",
+            "domain:pixel.spotify.com",
+            "domain:adstudio.spotify.com",
+            "domain:crashdump.spotify.com",
+            "domain:su",
+            "domain:xn--p1ai",
+            "domain:ozonusercontent.com",
+            "domain:yandex.net",
+            "domain:yandexcloud.net",
+            "domain:yastatic.net",
+            "domain:yandex.com",
+            "domain:yandex.by",
+            "domain:yandex.kz",
+            "domain:yandex.ua",
+            "domain:yandex.uz",
+            "domain:yandex.az",
+            "domain:yandex.ge",
+            "domain:yandex.kg",
+            "domain:yandex.tj",
+            "domain:yandex.am",
+            "domain:yandex.md",
+            "domain:yandex.tm",
+            "domain:yandex.ee",
+            "domain:yandex.lv",
+            "domain:yandex.lt",
+            "domain:vk.com",
+            "domain:userapi.com",
+            "domain:vk-cdn.net",
+            "domain:mycdn.me",
+            "domain:ozon.ru",
+            "domain:ozon.com",
+            "domain:ozon.io",
+            "domain:ozon.travel",
+            "domain:sberdevices.ru",
+            "domain:sber.ru"
+          ],
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "balancerTag": "auto-balance"
         }
-      }
+      ]
     },
-    {
-      "tag": "se-proxy-3",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "net.oneoneok.com",
-            "port": 443,
-            "users": [
-              {
-                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
-                "encryption": "none",
-                "flow": ""
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "grpc",
-        "grpcSettings": {
-          "serviceName": "api.v1.StreamService",
-          "authority": "",
-          "mode": false
+    "observatory": {
+      "subjectSelector": [
+        "proxy_"
+      ],
+      "probeURL": "https://www.google.com/generate_204",
+      "probeInterval": "10s"
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "port": 10808,
+        "listen": "127.0.0.1",
+        "protocol": "socks",
+        "settings": {
+          "udp": true,
+          "auth": "noauth"
         },
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "net.oneoneok.com",
-          "publicKey": "fl73IBnFC9oaLCgTZkYWoCS9gbintk3TxHnKiE20Nk8",
-          "shortId": "62b68b9d30622133",
-          "fingerprint": "firefox"
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": false,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
-      }
-    },
-    {
-      "tag": "se-proxy-4",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "static.oneoneok.com",
-            "port": 443,
-            "users": [
-              {
-                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
-                "encryption": "none",
-                "flow": ""
-              }
-            ]
-          }
-        ]
       },
-      "streamSettings": {
-        "network": "grpc",
-        "grpcSettings": {
-          "serviceName": "api.v1.StreamService",
-          "authority": "",
-          "mode": false
+      {
+        "tag": "http",
+        "port": 10809,
+        "listen": "127.0.0.1",
+        "protocol": "http",
+        "settings": {
+          "allowTransparent": false
         },
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "static.oneoneok.com",
-          "publicKey": "oVbonPGBPZ_qGyhHPe-LwsyPc0oobby2YknsPE90iRo",
-          "shortId": "0b46e0908285b078",
-          "fingerprint": "firefox"
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": false,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       }
-    },
-    {
-      "tag": "se-proxy-5",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "api.oneoneok.com",
-            "port": 443,
-            "users": [
-              {
-                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
-                "encryption": "none",
-                "flow": ""
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "grpc",
-        "grpcSettings": {
-          "serviceName": "api.v1.StreamService",
-          "authority": "",
-          "mode": false
-        },
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "api.oneoneok.com",
-          "publicKey": "4EY4k0Ush0fOcMCMbbx4qPv5OBXswb77LGN6wH8axSA",
-          "shortId": "5747aafd6c68484a",
-          "fingerprint": "firefox"
-        }
-      }
-    },
-    {
-      "tag": "se-proxy-6",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "cache.oneoneok.com",
-            "port": 443,
-            "users": [
-              {
-                "id": "2d037902-fc43-4f6d-99ab-4a1ba154f947",
-                "encryption": "none",
-                "flow": ""
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "grpc",
-        "grpcSettings": {
-          "serviceName": "api.v1.StreamService",
-          "authority": "",
-          "mode": false
-        },
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "cache.oneoneok.com",
-          "publicKey": "4kJSkxtJWTweNdJngXxrbJw6CoIDo-Sfs7O0jhhOkXc",
-          "shortId": "687664dda12b706f",
-          "fingerprint": "firefox"
-        }
-      }
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "ingest.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "api.v2.ObjectService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "aDNsk312UNfOEh0RiyGZdK6opt__mMyKBSglqFKFP38",
-          "serverName": "ingest.oneokgames.com",
-          "shortId": "dbdbeaf4aa6e1a5c"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "sync.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "api.v2.ObjectService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "aDNsk312UNfOEh0RiyGZdK6opt__mMyKBSglqFKFP38",
-          "serverName": "sync.oneokgames.com",
-          "shortId": "dbdbeaf4aa6e1a5c"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-2"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "media.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "api.v2.ObjectService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "aDNsk312UNfOEh0RiyGZdK6opt__mMyKBSglqFKFP38",
-          "serverName": "media.oneokgames.com",
-          "shortId": "dbdbeaf4aa6e1a5c"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-3"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "get.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "node.v1.MetricsService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "Lij6_wEY1WQ8p9wjOyErAAmY8ce4oZmEO4QtYXH-WiU",
-          "serverName": "get.oneokgames.com",
-          "shortId": "b9707fe704eb1415"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-4"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "content.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "node.v1.MetricsService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "Lij6_wEY1WQ8p9wjOyErAAmY8ce4oZmEO4QtYXH-WiU",
-          "serverName": "content.oneokgames.com",
-          "shortId": "b9707fe704eb1415"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-5"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "main.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "node.v1.MetricsService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "Lij6_wEY1WQ8p9wjOyErAAmY8ce4oZmEO4QtYXH-WiU",
-          "serverName": "main.oneokgames.com",
-          "shortId": "b9707fe704eb1415"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-6"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "gateway.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "rpc.v1.StreamService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "2ByKrIVItayTLa4VxxsEpSMi5Anjk8tGqsUm9A2YU2I",
-          "serverName": "gateway.oneokgames.com",
-          "shortId": "acd160fedb4b4006"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-7"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "static.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "rpc.v1.StreamService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "2ByKrIVItayTLa4VxxsEpSMi5Anjk8tGqsUm9A2YU2I",
-          "serverName": "static.oneokgames.com",
-          "shortId": "acd160fedb4b4006"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-8"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "mirror.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "rpc.v1.StreamService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "2ByKrIVItayTLa4VxxsEpSMi5Anjk8tGqsUm9A2YU2I",
-          "serverName": "mirror.oneokgames.com",
-          "shortId": "acd160fedb4b4006"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-9"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "cdn.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "push.v2.FeedService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "VTO26jBMVVnEnnHQON7k8lB3ED46_JHshPorJHHXSRU",
-          "serverName": "cdn.oneokgames.com",
-          "shortId": "a30b344b5214d62f"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-10"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "tracker.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "push.v2.FeedService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "VTO26jBMVVnEnnHQON7k8lB3ED46_JHshPorJHHXSRU",
-          "serverName": "tracker.oneokgames.com",
-          "shortId": "a30b344b5214d62f"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-11"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "api.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "push.v2.FeedService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "VTO26jBMVVnEnnHQON7k8lB3ED46_JHshPorJHHXSRU",
-          "serverName": "api.oneokgames.com",
-          "shortId": "a30b344b5214d62f"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-12"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "images.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "media.v1.SyncService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "x9m8Vxk2YlwXy8CLrHeEMDzLJWuRQ3mh6CPWA34u2yY",
-          "serverName": "images.oneokgames.com",
-          "shortId": "ad613873130544ab"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-13"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "assets.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "media.v1.SyncService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "x9m8Vxk2YlwXy8CLrHeEMDzLJWuRQ3mh6CPWA34u2yY",
-          "serverName": "assets.oneokgames.com",
-          "shortId": "ad613873130544ab"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-14"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "link.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "media.v1.SyncService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "x9m8Vxk2YlwXy8CLrHeEMDzLJWuRQ3mh6CPWA34u2yY",
-          "serverName": "link.oneokgames.com",
-          "shortId": "ad613873130544ab"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-15"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "edge1.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "home.v1.ApiService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "0ffnN7CdnOgEEFJ3AY1lnuTtsOPDL059UaTTxGxDjTA",
-          "serverName": "edge1.oneokgames.com",
-          "shortId": "66ffd800ba2ec7c3"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-16"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "eu.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "home.v1.ApiService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "0ffnN7CdnOgEEFJ3AY1lnuTtsOPDL059UaTTxGxDjTA",
-          "serverName": "eu.oneokgames.com",
-          "shortId": "66ffd800ba2ec7c3"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-17"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "push.oneokgames.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "",
-          "mode": false,
-          "serviceName": "home.v1.ApiService"
-        },
-        "network": "grpc",
-        "realitySettings": {
-          "fingerprint": "firefox",
-          "publicKey": "0ffnN7CdnOgEEFJ3AY1lnuTtsOPDL059UaTTxGxDjTA",
-          "serverName": "push.oneokgames.com",
-          "shortId": "66ffd800ba2ec7c3"
-        },
-        "security": "reality"
-      },
-      "tag": "nl-proxy-18"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "edge1.numberoneok.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "edge1.numberoneok.com",
-          "mode": false,
-          "serviceName": "rpc.v1.SyncService"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "edge1.numberoneok.com"
-        }
-      },
-      "tag": "uk-proxy"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "link.numberoneok.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "link.numberoneok.com",
-          "mode": false,
-          "serviceName": "rpc.v1.SyncService"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "link.numberoneok.com"
-        }
-      },
-      "tag": "uk-proxy-2"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "static.numberoneok.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "static.numberoneok.com",
-          "mode": false,
-          "serviceName": "rpc.v1.SyncService"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "static.numberoneok.com"
-        }
-      },
-      "tag": "uk-proxy-3"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fetch.numberoneok.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "fetch.numberoneok.com",
-          "mode": false,
-          "serviceName": "gw.v2.RelayService"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "fetch.numberoneok.com"
-        }
-      },
-      "tag": "uk-proxy-4"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "edge.numberoneok.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "edge.numberoneok.com",
-          "mode": false,
-          "serviceName": "gw.v2.RelayService"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "edge.numberoneok.com"
-        }
-      },
-      "tag": "uk-proxy-5"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "relay.numberoneok.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "relay.numberoneok.com",
-          "mode": false,
-          "serviceName": "gw.v2.RelayService"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "relay.numberoneok.com"
-        }
-      },
-      "tag": "uk-proxy-6"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr17.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "fr17.univesalsrv.com",
-          "mode": false,
-          "serviceName": "mobile.api.Event"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "fr17.univesalsrv.com"
-        }
-      },
-      "tag": "fr-proxy"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr20.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "fr20.univesalsrv.com",
-          "mode": false,
-          "serviceName": "mobile.api.Event"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "fr20.univesalsrv.com"
-        }
-      },
-      "tag": "fr-proxy-2"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr21.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "fr21.univesalsrv.com",
-          "mode": false,
-          "serviceName": "mobile.api.Event"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "fr21.univesalsrv.com"
-        }
-      },
-      "tag": "fr-proxy-3"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr19.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "fr19.univesalsrv.com",
-          "mode": false,
-          "serviceName": "mobile.api.Event"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "fr19.univesalsrv.com"
-        }
-      },
-      "tag": "fr-proxy-4"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr24.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "fr24.univesalsrv.com",
-          "mode": false,
-          "serviceName": "mobile.api.Event"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "fr24.univesalsrv.com"
-        }
-      },
-      "tag": "fr-proxy-5"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr23.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "fr23.univesalsrv.com",
-          "mode": false,
-          "serviceName": "mobile.api.Event"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "fr23.univesalsrv.com"
-        }
-      },
-      "tag": "fr-proxy-6"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr26.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "fr26.univesalsrv.com",
-          "mode": false,
-          "serviceName": "mobile.api.Event"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "fr26.univesalsrv.com"
-        }
-      },
-      "tag": "fr-proxy-7"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr25.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "fr25.univesalsrv.com",
-          "mode": false,
-          "serviceName": "mobile.api.Event"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "fr25.univesalsrv.com"
-        }
-      },
-      "tag": "fr-proxy-8"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr27.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "fr27.univesalsrv.com",
-          "mode": false,
-          "serviceName": "mobile.api.Event"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "fr27.univesalsrv.com"
-        }
-      },
-      "tag": "fr-proxy-9"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr18.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "grpcSettings": {
-          "authority": "fr18.univesalsrv.com",
-          "mode": false,
-          "serviceName": "mobile.api.Event"
-        },
-        "network": "grpc",
-        "security": "tls",
-        "tlsSettings": {
-          "alpn": [
-            "h2"
-          ],
-          "fingerprint": "firefox",
-          "serverName": "fr18.univesalsrv.com"
-        }
-      },
-      "tag": "fr-proxy-10"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr17.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "xhttp",
-        "security": "tls",
-        "tlsSettings": {
-          "fingerprint": "firefox",
-          "serverName": "fr17.univesalsrv.com"
-        },
-        "xhttpSettings": {
-          "extra": {
-            "mode": "packet-up",
-            "path": "/api/v1/media/upload/",
-            "scMaxBufferedPosts": 30,
-            "scMaxEachPostBytes": 1000000,
-            "scMinPostsIntervalMs": 30,
-            "xPaddingBytes": "100-1000",
-            "xmux": {
-              "maxConcurrency": "16-32",
-              "maxConnections": 0
+    ],
+    "outbounds": [
+      {
+        "tag": "proxy_ru_1",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "146.19.128.152",
+              "port": 8765,
+              "users": [
+                {
+                  "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
             }
-          },
-          "host": "fr17.univesalsrv.com",
-          "mode": "auto",
-          "path": "/api/v1/media/upload/"
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "tcpSettings": {},
+          "realitySettings": {
+            "serverName": "www.samsung.com",
+            "publicKey": "uXKpoUYa0BLHflsIxD2SLycUSsvTR8g4lPx-PXVMlAE",
+            "shortId": "6a7b8c9d32",
+            "fingerprint": "firefox"
+          }
         }
       },
-      "tag": "fr-proxy-11"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr20.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "xhttp",
-        "security": "tls",
-        "tlsSettings": {
-          "fingerprint": "firefox",
-          "serverName": "fr20.univesalsrv.com"
-        },
-        "xhttpSettings": {
-          "extra": {
-            "mode": "packet-up",
-            "path": "/api/v1/media/upload/",
-            "scMaxBufferedPosts": 30,
-            "scMaxEachPostBytes": 1000000,
-            "scMinPostsIntervalMs": 30,
-            "xPaddingBytes": "100-1000",
-            "xmux": {
-              "maxConcurrency": "16-32",
-              "maxConnections": 0
+      {
+        "tag": "proxy_ru_2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "146.19.128.149",
+              "port": 8765,
+              "users": [
+                {
+                  "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
             }
-          },
-          "host": "fr20.univesalsrv.com",
-          "mode": "auto",
-          "path": "/api/v1/media/upload/"
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "tcpSettings": {},
+          "realitySettings": {
+            "serverName": "www.samsung.com",
+            "publicKey": "uXKpoUYa0BLHflsIxD2SLycUSsvTR8g4lPx-PXVMlAE",
+            "shortId": "6a7b8c9d32",
+            "fingerprint": "firefox"
+          }
         }
       },
-      "tag": "fr-proxy-12"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr21.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "xhttp",
-        "security": "tls",
-        "tlsSettings": {
-          "fingerprint": "firefox",
-          "serverName": "fr21.univesalsrv.com"
-        },
-        "xhttpSettings": {
-          "extra": {
-            "mode": "packet-up",
-            "path": "/api/v1/media/upload/",
-            "scMaxBufferedPosts": 30,
-            "scMaxEachPostBytes": 1000000,
-            "scMinPostsIntervalMs": 30,
-            "xPaddingBytes": "100-1000",
-            "xmux": {
-              "maxConcurrency": "16-32",
-              "maxConnections": 0
+      {
+        "tag": "proxy_lv",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "31.42.120.59",
+              "port": 8767,
+              "users": [
+                {
+                  "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
             }
-          },
-          "host": "fr21.univesalsrv.com",
-          "mode": "auto",
-          "path": "/api/v1/media/upload/"
+          ]
+        },
+        "streamSettings": {
+          "network": "kcp",
+          "security": "none",
+          "kcpSettings": {
+            "mtu": 1350,
+            "tti": 50,
+            "congestion": true
+          }
         }
       },
-      "tag": "fr-proxy-13"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr19.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "xhttp",
-        "security": "tls",
-        "tlsSettings": {
-          "fingerprint": "firefox",
-          "serverName": "fr19.univesalsrv.com"
-        },
-        "xhttpSettings": {
-          "extra": {
-            "mode": "packet-up",
-            "path": "/api/v1/media/upload/",
-            "scMaxBufferedPosts": 30,
-            "scMaxEachPostBytes": 1000000,
-            "scMinPostsIntervalMs": 30,
-            "xPaddingBytes": "100-1000",
-            "xmux": {
-              "maxConcurrency": "16-32",
-              "maxConnections": 0
+      {
+        "tag": "proxy_ee",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "95.85.224.182",
+              "port": 8767,
+              "users": [
+                {
+                  "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
             }
-          },
-          "host": "fr19.univesalsrv.com",
-          "mode": "auto",
-          "path": "/api/v1/media/upload/"
+          ]
+        },
+        "streamSettings": {
+          "network": "kcp",
+          "security": "none",
+          "kcpSettings": {
+            "mtu": 1350,
+            "tti": 50,
+            "congestion": true
+          }
         }
       },
-      "tag": "fr-proxy-14"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr24.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "xhttp",
-        "security": "tls",
-        "tlsSettings": {
-          "fingerprint": "firefox",
-          "serverName": "fr24.univesalsrv.com"
-        },
-        "xhttpSettings": {
-          "extra": {
-            "mode": "packet-up",
-            "path": "/api/v1/media/upload/",
-            "scMaxBufferedPosts": 30,
-            "scMaxEachPostBytes": 1000000,
-            "scMinPostsIntervalMs": 30,
-            "xPaddingBytes": "100-1000",
-            "xmux": {
-              "maxConcurrency": "16-32",
-              "maxConnections": 0
+      {
+        "tag": "proxy_de",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "31.76.54.164",
+              "port": 55444,
+              "users": [
+                {
+                  "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
             }
-          },
-          "host": "fr24.univesalsrv.com",
-          "mode": "auto",
-          "path": "/api/v1/media/upload/"
+          ]
+        },
+        "streamSettings": {
+          "network": "kcp",
+          "security": "none",
+          "kcpSettings": {
+            "mtu": 1350,
+            "tti": 50,
+            "congestion": true
+          }
         }
       },
-      "tag": "fr-proxy-15"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr23.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "xhttp",
-        "security": "tls",
-        "tlsSettings": {
-          "fingerprint": "firefox",
-          "serverName": "fr23.univesalsrv.com"
-        },
-        "xhttpSettings": {
-          "extra": {
-            "mode": "packet-up",
-            "path": "/api/v1/media/upload/",
-            "scMaxBufferedPosts": 30,
-            "scMaxEachPostBytes": 1000000,
-            "scMinPostsIntervalMs": 30,
-            "xPaddingBytes": "100-1000",
-            "xmux": {
-              "maxConcurrency": "16-32",
-              "maxConnections": 0
+      {
+        "tag": "proxy_fi",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "78.40.209.64",
+              "port": 8766,
+              "users": [
+                {
+                  "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
             }
-          },
-          "host": "fr23.univesalsrv.com",
-          "mode": "auto",
-          "path": "/api/v1/media/upload/"
+          ]
+        },
+        "streamSettings": {
+          "network": "kcp",
+          "security": "none",
+          "kcpSettings": {
+            "mtu": 1350,
+            "tti": 50,
+            "congestion": true
+          }
         }
       },
-      "tag": "fr-proxy-16"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr26.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "xhttp",
-        "security": "tls",
-        "tlsSettings": {
-          "fingerprint": "firefox",
-          "serverName": "fr26.univesalsrv.com"
-        },
-        "xhttpSettings": {
-          "extra": {
-            "mode": "packet-up",
-            "path": "/api/v1/media/upload/",
-            "scMaxBufferedPosts": 30,
-            "scMaxEachPostBytes": 1000000,
-            "scMinPostsIntervalMs": 30,
-            "xPaddingBytes": "100-1000",
-            "xmux": {
-              "maxConcurrency": "16-32",
-              "maxConnections": 0
-            }
-          },
-          "host": "fr26.univesalsrv.com",
-          "mode": "auto",
-          "path": "/api/v1/media/upload/"
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {
+          "domainStrategy": "UseIP"
         }
       },
-      "tag": "fr-proxy-17"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr25.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
+      {
+        "tag": "block",
+        "protocol": "blackhole",
+        "settings": {
+          "response": {
+            "type": "http"
           }
-        ]
-      },
-      "streamSettings": {
-        "network": "xhttp",
-        "security": "tls",
-        "tlsSettings": {
-          "fingerprint": "firefox",
-          "serverName": "fr25.univesalsrv.com"
-        },
-        "xhttpSettings": {
-          "extra": {
-            "mode": "packet-up",
-            "path": "/api/v1/media/upload/",
-            "scMaxBufferedPosts": 30,
-            "scMaxEachPostBytes": 1000000,
-            "scMinPostsIntervalMs": 30,
-            "xPaddingBytes": "100-1000",
-            "xmux": {
-              "maxConcurrency": "16-32",
-              "maxConnections": 0
-            }
-          },
-          "host": "fr25.univesalsrv.com",
-          "mode": "auto",
-          "path": "/api/v1/media/upload/"
-        }
-      },
-      "tag": "fr-proxy-18"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr27.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "xhttp",
-        "security": "tls",
-        "tlsSettings": {
-          "fingerprint": "firefox",
-          "serverName": "fr27.univesalsrv.com"
-        },
-        "xhttpSettings": {
-          "extra": {
-            "mode": "packet-up",
-            "path": "/api/v1/media/upload/",
-            "scMaxBufferedPosts": 30,
-            "scMaxEachPostBytes": 1000000,
-            "scMinPostsIntervalMs": 30,
-            "xPaddingBytes": "100-1000",
-            "xmux": {
-              "maxConcurrency": "16-32",
-              "maxConnections": 0
-            }
-          },
-          "host": "fr27.univesalsrv.com",
-          "mode": "auto",
-          "path": "/api/v1/media/upload/"
-        }
-      },
-      "tag": "fr-proxy-19"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "fr18.univesalsrv.com",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "flow": "",
-                "id": "12cff8b3-9509-4e44-bcc7-6584d8df2acc"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "xhttp",
-        "security": "tls",
-        "tlsSettings": {
-          "fingerprint": "firefox",
-          "serverName": "fr18.univesalsrv.com"
-        },
-        "xhttpSettings": {
-          "extra": {
-            "mode": "packet-up",
-            "path": "/api/v1/media/upload/",
-            "scMaxBufferedPosts": 30,
-            "scMaxEachPostBytes": 1000000,
-            "scMinPostsIntervalMs": 30,
-            "xPaddingBytes": "100-1000",
-            "xmux": {
-              "maxConcurrency": "16-32",
-              "maxConnections": 0
-            }
-          },
-          "host": "fr18.univesalsrv.com",
-          "mode": "auto",
-          "path": "/api/v1/media/upload/"
-        }
-      },
-      "tag": "fr-proxy-20"
-    },
-    {
-      "tag": "my-proxy-1",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "172.64.52.68",
-            "port": 2087,
-            "users": [
-              {
-                "id": "77777777-8a3e-6666-b6d1-a9c5f0e8b3a2",
-                "encryption": "none",
-                "flow": ""
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "ws",
-        "wsSettings": {
-          "path": "/",
-          "headers": {
-            "Host": "faxf32gkfzoxqv.fx6hsv0.ccwu.cc"
-          }
-        },
-        "security": "tls",
-        "tlsSettings": {
-          "serverName": "faxf32gkfzoxqv.fx6hsv0.ccwu.cc",
-          "fingerprint": "chrome"
         }
       }
-    },
-    {
-      "tag": "direct",
-      "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIP"
-      }
-    },
-    {
-      "tag": "block",
-      "protocol": "blackhole"
-    },
-    {
-      "tag": "dns-out",
-      "protocol": "dns"
-    }
-  ],
-  "burstObservatory": {
-    "pingConfig": {
-      "connectivity": "http://connectivitycheck.gstatic.com/generate_204",
-      "destination": "http://connectivitycheck.gstatic.com/generate_204",
-      "interval": "15s",
-      "sampling": 5,
-      "timeout": "3s"
-    },
-    "subjectSelector": [
-      "se-proxy",
-      "se-proxy-2",
-      "se-proxy-3",
-      "se-proxy-4",
-      "se-proxy-5",
-      "se-proxy-6",
-      "nl-proxy",
-      "nl-proxy-2",
-      "nl-proxy-3",
-      "nl-proxy-4",
-      "nl-proxy-5",
-      "nl-proxy-6",
-      "nl-proxy-7",
-      "nl-proxy-8",
-      "nl-proxy-9",
-      "nl-proxy-10",
-      "nl-proxy-11",
-      "nl-proxy-12",
-      "nl-proxy-13",
-      "nl-proxy-14",
-      "nl-proxy-15",
-      "nl-proxy-16",
-      "nl-proxy-17",
-      "nl-proxy-18",
-      "uk-proxy",
-      "uk-proxy-2",
-      "uk-proxy-3",
-      "uk-proxy-4",
-      "uk-proxy-5",
-      "uk-proxy-6",
-      "fr-proxy",
-      "fr-proxy-2",
-      "fr-proxy-3",
-      "fr-proxy-4",
-      "fr-proxy-5",
-      "fr-proxy-6",
-      "fr-proxy-7",
-      "fr-proxy-8",
-      "fr-proxy-9",
-      "fr-proxy-10",
-      "fr-proxy-11",
-      "fr-proxy-12",
-      "fr-proxy-13",
-      "fr-proxy-14",
-      "fr-proxy-15",
-      "fr-proxy-16",
-      "fr-proxy-17",
-      "fr-proxy-18",
-      "fr-proxy-19",
-      "fr-proxy-20",
-      "my-proxy-1"
     ]
-  },
-  "observatory": {
-    "subjectSelector": [
-      "se-proxy",
-      "se-proxy-2",
-      "se-proxy-3",
-      "se-proxy-4",
-      "se-proxy-5",
-      "se-proxy-6",
-      "nl-proxy",
-      "nl-proxy-2",
-      "nl-proxy-3",
-      "nl-proxy-4",
-      "nl-proxy-5",
-      "nl-proxy-6",
-      "nl-proxy-7",
-      "nl-proxy-8",
-      "nl-proxy-9",
-      "nl-proxy-10",
-      "nl-proxy-11",
-      "nl-proxy-12",
-      "nl-proxy-13",
-      "nl-proxy-14",
-      "nl-proxy-15",
-      "nl-proxy-16",
-      "nl-proxy-17",
-      "nl-proxy-18",
-      "uk-proxy",
-      "uk-proxy-2",
-      "uk-proxy-3",
-      "uk-proxy-4",
-      "uk-proxy-5",
-      "uk-proxy-6",
-      "fr-proxy",
-      "fr-proxy-2",
-      "fr-proxy-3",
-      "fr-proxy-4",
-      "fr-proxy-5",
-      "fr-proxy-6",
-      "fr-proxy-7",
-      "fr-proxy-8",
-      "fr-proxy-9",
-      "fr-proxy-10",
-      "fr-proxy-11",
-      "fr-proxy-12",
-      "fr-proxy-13",
-      "fr-proxy-14",
-      "fr-proxy-15",
-      "fr-proxy-16",
-      "fr-proxy-17",
-      "fr-proxy-18",
-      "fr-proxy-19",
-      "fr-proxy-20",
-      "my-proxy-1"
-    ],
-    "probeURL": "http://connectivitycheck.gstatic.com/generate_204",
-    "probeInterval": "15s"
   }
-}
+]
