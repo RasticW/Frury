@@ -1,414 +1,679 @@
-{
-  "remarks": "🇪🇺 Авто-выбор",
-  "log": {
-    "loglevel": "warning"
-  },
-  "dns": {
-    "servers": [
+[
+  {
+    "remarks": "🇪🇺 Авто-выбор | запасной",
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "1.0.0.1"
+      ],
+      "queryStrategy": "UseIP"
+    },
+    "routing": {
+      "rules": [
+        {
+          "type": "field",
+          "protocol": [
+            "bittorrent"
+          ],
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "balancerTag": "Super_Balancer"
+        }
+      ],
+      "balancers": [
+        {
+          "tag": "Super_Balancer",
+          "selector": [
+            "proxy"
+          ],
+          "strategy": {
+            "type": "leastLoad",
+            "settings": {
+              "maxRTT": "1500ms",
+              "expected": 2,
+              "baselines": [
+                "600ms",
+                "900ms"
+              ],
+              "tolerance": 0.3
+            }
+          },
+          "fallbackTag": "direct"
+        }
+      ],
+      "domainMatcher": "hybrid",
+      "domainStrategy": "IPIfNonMatch"
+    },
+    "inbounds": [
       {
-        "address": "77.88.8.8",
-        "domains": [
-          "domain:ru",
-          "domain:ozon.com",
-          "domain:ozonusercontent.com",
-          "domain:ozon.io",
-          "domain:ozon.travel",
-          "domain:wildberries.ru"
-        ]
+        "tag": "socks",
+        "port": 10808,
+        "listen": "127.0.0.1",
+        "protocol": "socks",
+        "settings": {
+          "udp": true,
+          "auth": "noauth"
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": false,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
+        }
       },
-      "1.1.1.1"
-    ],
-    "queryStrategy": "UseIPv4"
-  },
-  "routing": {
-    "domainMatcher": "hybrid",
-    "domainStrategy": "AsIs",
-    "balancers": [
       {
-        "tag": "auto-balance",
-        "selector": [
-          "proxy_"
-        ],
-        "strategy": {
-          "type": "leastPing"
+        "tag": "http",
+        "port": 10809,
+        "listen": "127.0.0.1",
+        "protocol": "http",
+        "settings": {
+          "allowTransparent": false
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": false,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
         }
       }
     ],
-    "rules": [
+    "outbounds": [
       {
-        "ip": [
-          "geoip:private"
-        ],
-        "type": "field",
-        "outboundTag": "block"
+        "tag": "proxy",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "217.60.24.57",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "51d0ac89-8e1a-4cd8-91bf-246deb124ac8",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "cdn.shopify.com",
+            "publicKey": "NI5Rkfn6zO_gF-UC1nuvJwu4SDakCXh3ygJOKU1EITU",
+            "shortId": "f747a7a5793b5714",
+            "fingerprint": "firefox"
+          }
+        }
       },
       {
-        "type": "field",
-        "protocol": [
-          "bittorrent"
-        ],
-        "outboundTag": "block"
+        "tag": "proxy-2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "217.60.24.61",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "51d0ac89-8e1a-4cd8-91bf-246deb124ac8",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "cdn.shopify.com",
+            "publicKey": "NI5Rkfn6zO_gF-UC1nuvJwu4SDakCXh3ygJOKU1EITU",
+            "shortId": "f747a7a5793b5714",
+            "fingerprint": "firefox"
+          }
+        }
       },
       {
-        "ip": [
-          "77.88.8.8",
-          "77.88.8.1"
-        ],
-        "type": "field",
-        "outboundTag": "direct"
+        "tag": "proxy-3",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "217.60.23.154",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "51d0ac89-8e1a-4cd8-91bf-246deb124ac8",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "cdn.shopify.com",
+            "publicKey": "NI5Rkfn6zO_gF-UC1nuvJwu4SDakCXh3ygJOKU1EITU",
+            "shortId": "f747a7a5793b5714",
+            "fingerprint": "firefox"
+          }
+        }
       },
       {
-        "ip": [
-          "185.73.192.0/22",
-          "195.34.20.0/23",
-          "46.226.122.0/24",
-          "91.212.64.0/24",
-          "91.223.93.0/24",
-          "154.90.70.0/24",
-          "45.194.67.0/24",
-          "45.194.92.0/24",
-          "45.198.224.0/24",
-          "45.205.1.0/24",
-          "109.197.224.0/21",
-          "109.74.160.0/20",
-          "134.255.128.0/19",
-          "178.217.224.0/21",
-          "185.132.28.0/22",
-          "185.162.204.0/22",
-          "185.2.104.0/22",
-          "185.201.88.0/22",
-          "185.204.156.0/22",
-          "185.214.252.0/22",
-          "185.229.192.0/22",
-          "185.252.228.0/22",
-          "185.59.56.0/22",
-          "185.60.212.0/22",
-          "193.168.176.0/22",
-          "193.46.244.0/22",
-          "194.169.56.0/22",
-          "195.69.136.0/22",
-          "213.109.48.0/20",
-          "217.151.224.0/22",
-          "217.151.232.0/21",
-          "45.131.56.0/22",
-          "46.36.0.0/19",
-          "5.199.192.0/19",
-          "5.43.128.0/19",
-          "82.112.32.0/19",
-          "88.218.212.0/22",
-          "91.193.148.0/22",
-          "91.197.204.0/22",
-          "91.211.20.0/22",
-          "91.223.170.0/24",
-          "91.227.50.0/23",
-          "91.231.196.0/22",
-          "91.235.188.0/22",
-          "93.90.96.0/20",
-          "94.230.128.0/20",
-          "94.230.142.0/23",
-          "95.181.181.0/24"
-        ],
-        "type": "field",
-        "outboundTag": "direct"
+        "tag": "proxy-4",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "2.26.122.101",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "51d0ac89-8e1a-4cd8-91bf-246deb124ac8",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "cdn.shopify.com",
+            "publicKey": "NI5Rkfn6zO_gF-UC1nuvJwu4SDakCXh3ygJOKU1EITU",
+            "shortId": "f747a7a5793b5714",
+            "fingerprint": "firefox"
+          }
+        }
       },
       {
-        "type": "field",
-        "domain": [
-          "domain:ru",
-          "domain:audio-ads.spotify.com",
-          "domain:adeventtracker.spotify.com",
-          "domain:ads-fa.spotify.com",
-          "domain:ads-akp.spotify.com",
-          "domain:pixel.spotify.com",
-          "domain:adstudio.spotify.com",
-          "domain:crashdump.spotify.com",
-          "domain:su",
-          "domain:xn--p1ai",
-          "domain:ozonusercontent.com",
-          "domain:yandex.net",
-          "domain:yandexcloud.net",
-          "domain:yastatic.net",
-          "domain:yandex.com",
-          "domain:yandex.by",
-          "domain:yandex.kz",
-          "domain:yandex.ua",
-          "domain:yandex.uz",
-          "domain:yandex.az",
-          "domain:yandex.ge",
-          "domain:yandex.kg",
-          "domain:yandex.tj",
-          "domain:yandex.am",
-          "domain:yandex.md",
-          "domain:yandex.tm",
-          "domain:yandex.ee",
-          "domain:yandex.lv",
-          "domain:yandex.lt",
-          "domain:vk.com",
-          "domain:userapi.com",
-          "domain:vk-cdn.net",
-          "domain:mycdn.me",
-          "domain:ozon.ru",
-          "domain:ozon.com",
-          "domain:ozon.io",
-          "domain:ozon.travel",
-          "domain:sberdevices.ru",
-          "domain:sber.ru"
-        ],
-        "outboundTag": "direct"
+        "tag": "proxy-5",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "94.183.219.243",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "51d0ac89-8e1a-4cd8-91bf-246deb124ac8",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "grpcSettings": {
+            "authority": "",
+            "mode": false
+          },
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "cdn.shopify.com",
+            "publicKey": "NI5Rkfn6zO_gF-UC1nuvJwu4SDakCXh3ygJOKU1EITU",
+            "shortId": "f747a7a5793b5714",
+            "fingerprint": "firefox"
+          }
+        }
       },
       {
-        "type": "field",
-        "network": "tcp,udp",
-        "balancerTag": "auto-balance"
+        "tag": "direct",
+        "protocol": "freedom"
+      },
+      {
+        "tag": "block",
+        "protocol": "blackhole"
+      }
+    ],
+    "burstObservatory": {
+      "pingConfig": {
+        "timeout": "2s",
+        "interval": "60s",
+        "sampling": 6,
+        "destination": "https://connectivitycheck.gstatic.com/generate_204",
+        "connectivity": ""
+      },
+      "subjectSelector": [
+        "proxy"
+      ]
+    }
+  },
+  {
+    "remarks": "🇪🇺 Авто-выбор | основной",
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        {
+          "address": "77.88.8.8",
+          "domains": [
+            "domain:ru",
+            "domain:ozon.com",
+            "domain:ozonusercontent.com",
+            "domain:ozon.io",
+            "domain:ozon.travel",
+            "domain:wildberries.ru"
+          ]
+        },
+        "1.1.1.1"
+      ],
+      "queryStrategy": "UseIPv4"
+    },
+    "routing": {
+      "domainMatcher": "hybrid",
+      "domainStrategy": "AsIs",
+      "balancers": [
+        {
+          "tag": "auto-balance",
+          "selector": [
+            "proxy_"
+          ],
+          "strategy": {
+            "type": "leastPing"
+          }
+        }
+      ],
+      "rules": [
+        {
+          "ip": [
+            "geoip:private"
+          ],
+          "type": "field",
+          "outboundTag": "block"
+        },
+        {
+          "type": "field",
+          "protocol": [
+            "bittorrent"
+          ],
+          "outboundTag": "block"
+        },
+        {
+          "ip": [
+            "77.88.8.8",
+            "77.88.8.1"
+          ],
+          "type": "field",
+          "outboundTag": "direct"
+        },
+        {
+          "ip": [
+            "185.73.192.0/22",
+            "195.34.20.0/23",
+            "46.226.122.0/24",
+            "91.212.64.0/24",
+            "91.223.93.0/24",
+            "154.90.70.0/24",
+            "45.194.67.0/24",
+            "45.194.92.0/24",
+            "45.198.224.0/24",
+            "45.205.1.0/24",
+            "109.197.224.0/21",
+            "109.74.160.0/20",
+            "134.255.128.0/19",
+            "178.217.224.0/21",
+            "185.132.28.0/22",
+            "185.162.204.0/22",
+            "185.2.104.0/22",
+            "185.201.88.0/22",
+            "185.204.156.0/22",
+            "185.214.252.0/22",
+            "185.229.192.0/22",
+            "185.252.228.0/22",
+            "185.59.56.0/22",
+            "185.60.212.0/22",
+            "193.168.176.0/22",
+            "193.46.244.0/22",
+            "194.169.56.0/22",
+            "195.69.136.0/22",
+            "213.109.48.0/20",
+            "217.151.224.0/22",
+            "217.151.232.0/21",
+            "45.131.56.0/22",
+            "46.36.0.0/19",
+            "5.199.192.0/19",
+            "5.43.128.0/19",
+            "82.112.32.0/19",
+            "88.218.212.0/22",
+            "91.193.148.0/22",
+            "91.197.204.0/22",
+            "91.211.20.0/22",
+            "91.223.170.0/24",
+            "91.227.50.0/23",
+            "91.231.196.0/22",
+            "91.235.188.0/22",
+            "93.90.96.0/20",
+            "94.230.128.0/20",
+            "94.230.142.0/23",
+            "95.181.181.0/24"
+          ],
+          "type": "field",
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "domain": [
+            "domain:ru",
+            "domain:audio-ads.spotify.com",
+            "domain:adeventtracker.spotify.com",
+            "domain:ads-fa.spotify.com",
+            "domain:ads-akp.spotify.com",
+            "domain:pixel.spotify.com",
+            "domain:adstudio.spotify.com",
+            "domain:crashdump.spotify.com",
+            "domain:su",
+            "domain:xn--p1ai",
+            "domain:ozonusercontent.com",
+            "domain:yandex.net",
+            "domain:yandexcloud.net",
+            "domain:yastatic.net",
+            "domain:yandex.com",
+            "domain:yandex.by",
+            "domain:yandex.kz",
+            "domain:yandex.ua",
+            "domain:yandex.uz",
+            "domain:yandex.az",
+            "domain:yandex.ge",
+            "domain:yandex.kg",
+            "domain:yandex.tj",
+            "domain:yandex.am",
+            "domain:yandex.md",
+            "domain:yandex.tm",
+            "domain:yandex.ee",
+            "domain:yandex.lv",
+            "domain:yandex.lt",
+            "domain:vk.com",
+            "domain:userapi.com",
+            "domain:vk-cdn.net",
+            "domain:mycdn.me",
+            "domain:ozon.ru",
+            "domain:ozon.com",
+            "domain:ozon.io",
+            "domain:ozon.travel",
+            "domain:sberdevices.ru",
+            "domain:sber.ru"
+          ],
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "balancerTag": "auto-balance"
+        }
+      ]
+    },
+    "observatory": {
+      "subjectSelector": [
+        "proxy_"
+      ],
+      "probeURL": "https://www.google.com/generate_204",
+      "probeInterval": "10s"
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "port": 10808,
+        "listen": "127.0.0.1",
+        "protocol": "socks",
+        "settings": {
+          "udp": true,
+          "auth": "noauth"
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": false,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
+        }
+      },
+      {
+        "tag": "http",
+        "port": 10809,
+        "listen": "127.0.0.1",
+        "protocol": "http",
+        "settings": {
+          "allowTransparent": false
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": false,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
+        }
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "proxy_ru_1",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "146.19.128.152",
+              "port": 8765,
+              "users": [
+                {
+                  "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "tcpSettings": {},
+          "realitySettings": {
+            "serverName": "www.samsung.com",
+            "publicKey": "uXKpoUYa0BLHflsIxD2SLycUSsvTR8g4lPx-PXVMlAE",
+            "shortId": "6a7b8c9d32",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy_ru_2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "146.19.128.149",
+              "port": 8765,
+              "users": [
+                {
+                  "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "tcpSettings": {},
+          "realitySettings": {
+            "serverName": "www.samsung.com",
+            "publicKey": "uXKpoUYa0BLHflsIxD2SLycUSsvTR8g4lPx-PXVMlAE",
+            "shortId": "6a7b8c9d32",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "proxy_lv",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "31.42.120.59",
+              "port": 8767,
+              "users": [
+                {
+                  "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "kcp",
+          "security": "none",
+          "kcpSettings": {
+            "mtu": 1350,
+            "tti": 50,
+            "congestion": true
+          }
+        }
+      },
+      {
+        "tag": "proxy_ee",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "95.85.224.182",
+              "port": 8767,
+              "users": [
+                {
+                  "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "kcp",
+          "security": "none",
+          "kcpSettings": {
+            "mtu": 1350,
+            "tti": 50,
+            "congestion": true
+          }
+        }
+      },
+      {
+        "tag": "proxy_de",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "31.76.54.164",
+              "port": 55444,
+              "users": [
+                {
+                  "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "kcp",
+          "security": "none",
+          "kcpSettings": {
+            "mtu": 1350,
+            "tti": 50,
+            "congestion": true
+          }
+        }
+      },
+      {
+        "tag": "proxy_fi",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "78.40.209.64",
+              "port": 8766,
+              "users": [
+                {
+                  "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
+                  "encryption": "none",
+                  "flow": ""
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "kcp",
+          "security": "none",
+          "kcpSettings": {
+            "mtu": 1350,
+            "tti": 50,
+            "congestion": true
+          }
+        }
+      },
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {
+          "domainStrategy": "UseIP"
+        }
+      },
+      {
+        "tag": "block",
+        "protocol": "blackhole",
+        "settings": {
+          "response": {
+            "type": "http"
+          }
+        }
       }
     ]
-  },
-  "observatory": {
-    "subjectSelector": [
-      "proxy_"
-    ],
-    "probeURL": "https://www.google.com/generate_204",
-    "probeInterval": "10s"
-  },
-  "inbounds": [
-    {
-      "tag": "socks",
-      "port": 10808,
-      "listen": "127.0.0.1",
-      "protocol": "socks",
-      "settings": {
-        "udp": true,
-        "auth": "noauth"
-      },
-      "sniffing": {
-        "enabled": true,
-        "routeOnly": false,
-        "destOverride": [
-          "http",
-          "tls",
-          "quic"
-        ]
-      }
-    },
-    {
-      "tag": "http",
-      "port": 10809,
-      "listen": "127.0.0.1",
-      "protocol": "http",
-      "settings": {
-        "allowTransparent": false
-      },
-      "sniffing": {
-        "enabled": true,
-        "routeOnly": false,
-        "destOverride": [
-          "http",
-          "tls",
-          "quic"
-        ]
-      }
-    }
-  ],
-  "outbounds": [
-    {
-      "tag": "proxy_ru_1",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "146.19.128.152",
-            "port": 8765,
-            "users": [
-              {
-                "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
-                "encryption": "none",
-                "flow": "xtls-rprx-vision"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "tcpSettings": {},
-        "realitySettings": {
-          "serverName": "www.samsung.com",
-          "publicKey": "uXKpoUYa0BLHflsIxD2SLycUSsvTR8g4lPx-PXVMlAE",
-          "shortId": "6a7b8c9d32",
-          "fingerprint": "firefox"
-        }
-      }
-    },
-    {
-      "tag": "proxy_ru_2",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "146.19.128.149",
-            "port": 8765,
-            "users": [
-              {
-                "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
-                "encryption": "none",
-                "flow": "xtls-rprx-vision"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "tcpSettings": {},
-        "realitySettings": {
-          "serverName": "www.samsung.com",
-          "publicKey": "uXKpoUYa0BLHflsIxD2SLycUSsvTR8g4lPx-PXVMlAE",
-          "shortId": "6a7b8c9d32",
-          "fingerprint": "firefox"
-        }
-      }
-    },
-    {
-      "tag": "proxy_lv",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "31.42.120.59",
-            "port": 8767,
-            "users": [
-              {
-                "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
-                "encryption": "none",
-                "flow": ""
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "kcp",
-        "security": "none",
-        "kcpSettings": {
-          "mtu": 1350,
-          "tti": 50,
-          "congestion": true
-        },
-        "finalmask": {
-          "udp": []
-        }
-      }
-    },
-    {
-      "tag": "proxy_ee",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "95.85.224.182",
-            "port": 8767,
-            "users": [
-              {
-                "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
-                "encryption": "none",
-                "flow": ""
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "kcp",
-        "security": "none",
-        "kcpSettings": {
-          "mtu": 1350,
-          "tti": 50,
-          "congestion": true
-        },
-        "finalmask": {
-          "udp": []
-        }
-      }
-    },
-    {
-      "tag": "proxy_de",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "31.76.54.164",
-            "port": 55444,
-            "users": [
-              {
-                "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
-                "encryption": "none",
-                "flow": ""
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "kcp",
-        "security": "none",
-        "kcpSettings": {
-          "mtu": 1350,
-          "tti": 50,
-          "congestion": true
-        },
-        "finalmask": {
-          "udp": []
-        }
-      }
-    },
-    {
-      "tag": "proxy_fi",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "78.40.209.64",
-            "port": 8766,
-            "users": [
-              {
-                "id": "e3b93fa6-bffa-4e8d-bc00-daa438e44bc7",
-                "encryption": "none",
-                "flow": ""
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "kcp",
-        "security": "none",
-        "kcpSettings": {
-          "mtu": 1350,
-          "tti": 50,
-          "congestion": true
-        },
-        "finalmask": {
-          "udp": []
-        }
-      }
-    },
-    {
-      "tag": "direct",
-      "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIP"
-      }
-    },
-    {
-      "tag": "block",
-      "protocol": "blackhole",
-      "settings": {
-        "response": {
-          "type": "http"
-        }
-      }
-    }
-  ]
-}
+  }
+]
