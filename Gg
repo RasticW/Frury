@@ -2,10 +2,11 @@
   {
     "remarks": "🇷🇺 Авто-Выбор • Оптимальный",
     "dns": {
-      "queryStrategy": "UseIP",
+      "queryStrategy": "UseIPv4",
       "servers": [
         {
-          "address": "https://common.dot.dns.yandex.net/dns-query",
+          "address": "77.88.8.8",
+          "port": 53,
           "domains": [
             "regexp:\\.ru$",
             "regexp:\\.su$",
@@ -17,13 +18,11 @@
             "domain:tinkoff.ru",
             "domain:sberbank.ru",
             "domain:vk.com"
-          ],
-          "skipFallback": true
+          ]
         },
-        "https://1.1.1.1/dns-query",
-        "https://8.8.8.8/dns-query",
         "1.1.1.1",
-        "8.8.8.8"
+        "8.8.8.8",
+        "77.88.8.8"
       ]
     },
     "routing": {
@@ -1161,7 +1160,7 @@
   {
     "remarks": "🎬 YouTube • Без рекламы",
     "dns": {
-      "queryStrategy": "UseIP",
+      "queryStrategy": "UseIPv4",
       "servers": [
         "1.1.1.1",
         "8.8.8.8"
@@ -1341,7 +1340,7 @@
         "1.1.1.1",
         "8.8.8.8"
       ],
-      "queryStrategy": "UseIP"
+      "queryStrategy": "UseIPv4"
     },
     "routing": {
       "rules": [
@@ -1456,7 +1455,7 @@
         "1.1.1.1",
         "8.8.8.8"
       ],
-      "queryStrategy": "UseIP"
+      "queryStrategy": "UseIPv4"
     },
     "routing": {
       "rules": [
@@ -1571,7 +1570,7 @@
         "1.1.1.1",
         "8.8.8.8"
       ],
-      "queryStrategy": "UseIP"
+      "queryStrategy": "UseIPv4"
     },
     "routing": {
       "rules": [
@@ -1686,7 +1685,7 @@
         "1.1.1.1",
         "8.8.8.8"
       ],
-      "queryStrategy": "UseIP"
+      "queryStrategy": "UseIPv4"
     },
     "routing": {
       "rules": [
@@ -1801,7 +1800,7 @@
         "1.1.1.1",
         "8.8.8.8"
       ],
-      "queryStrategy": "UseIP"
+      "queryStrategy": "UseIPv4"
     },
     "routing": {
       "rules": [
@@ -1916,7 +1915,7 @@
         "1.1.1.1",
         "8.8.8.8"
       ],
-      "queryStrategy": "UseIP"
+      "queryStrategy": "UseIPv4"
     },
     "routing": {
       "rules": [
@@ -2023,7 +2022,7 @@
         "1.1.1.1",
         "8.8.8.8"
       ],
-      "queryStrategy": "UseIP"
+      "queryStrategy": "UseIPv4"
     },
     "routing": {
       "rules": [
@@ -2130,7 +2129,7 @@
         "1.1.1.1",
         "8.8.8.8"
       ],
-      "queryStrategy": "UseIP"
+      "queryStrategy": "UseIPv4"
     },
     "routing": {
       "rules": [
@@ -2237,7 +2236,7 @@
         "1.1.1.1",
         "8.8.8.8"
       ],
-      "queryStrategy": "UseIP"
+      "queryStrategy": "UseIPv4"
     },
     "routing": {
       "rules": [
@@ -2343,7 +2342,7 @@
         "1.1.1.1",
         "8.8.8.8"
       ],
-      "queryStrategy": "UseIP"
+      "queryStrategy": "UseIPv4"
     },
     "routing": {
       "rules": [
@@ -2450,7 +2449,7 @@
         "1.1.1.1",
         "8.8.8.8"
       ],
-      "queryStrategy": "UseIP"
+      "queryStrategy": "UseIPv4"
     },
     "routing": {
       "rules": [
@@ -2557,7 +2556,7 @@
         "1.1.1.1",
         "8.8.8.8"
       ],
-      "queryStrategy": "UseIP"
+      "queryStrategy": "UseIPv4"
     },
     "routing": {
       "rules": [
