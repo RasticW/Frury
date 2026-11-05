@@ -1,6 +1,6 @@
 [
   {
-    "remarks": "Авто-Выбор • Оптимальный",
+    "remarks": "🇷🇺 Авто-Выбор • Оптимальный",
     "dns": {
       "queryStrategy": "UseIPv4",
       "servers": [
@@ -839,7 +839,215 @@
     }
   },
   {
-    "remarks": "Германия",
+    "remarks": "🎬 YouTube • Без рекламы",
+    "dns": {
+      "queryStrategy": "UseIPv4",
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "routing": {
+      "domainMatcher": "hybrid",
+      "domainStrategy": "IPIfNonMatch",
+      "balancers": [
+        {
+          "tag": "YT_BALANCER",
+          "selector": [
+            "yt-"
+          ],
+          "strategy": {
+            "type": "leastLoad",
+            "settings": {
+              "expected": 1,
+              "baselines": [
+                "250ms",
+                "500ms"
+              ],
+              "tolerance": 0.1
+            }
+          },
+          "fallbackTag": "yt-eu-1"
+        }
+      ],
+      "rules": [
+        {
+          "type": "field",
+          "protocol": [
+            "bittorrent"
+          ],
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "balancerTag": "YT_BALANCER"
+        }
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "port": 10808,
+        "listen": "127.0.0.1",
+        "protocol": "socks",
+        "settings": {
+          "udp": true,
+          "auth": "noauth"
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": false,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
+        }
+      },
+      {
+        "tag": "http",
+        "port": 10809,
+        "listen": "127.0.0.1",
+        "protocol": "http",
+        "settings": {
+          "allowTransparent": false
+        },
+        "sniffing": {
+          "enabled": true,
+          "routeOnly": false,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
+        }
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "yt-ru-kite",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "95.182.120.160",
+              "port": 443,
+              "users": [
+                {
+                  "id": "1d1f4600-e461-477c-8b3a-9805cad991fb",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "kite742.filebeam.website",
+            "publicKey": "xcTXD3of3Yt5hHdIwYGZ1LjMBgiL6sqj5J33J4U4ozM",
+            "shortId": "a7c31f92",
+            "spiderX": "/",
+            "fingerprint": "firefox"
+          }
+        }
+      },
+      {
+        "tag": "yt-eu-1",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "45.9.117.245",
+              "port": 54408,
+              "users": [
+                {
+                  "id": "916ae1a6-fb7a-45d0-b78b-ccf4bafe154f",
+                  "encryption": "none",
+                  "security": "auto",
+                  "level": 8
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "xhttp",
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "blog.api.www.cloudflare.com",
+            "publicKey": "mcrsN7jK4ZJhrB_tqG-mwkzh8oVXDpTMPlOa6Is1vxM",
+            "shortId": "4543ee83de8406",
+            "spiderX": "/90f9e75230d7f0d",
+            "fingerprint": "firefox"
+          },
+          "xhttpSettings": {
+            "path": "/api/v1/sync-7f3c",
+            "mode": "stream-one"
+          }
+        }
+      },
+      {
+        "tag": "yt-eu-2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "45.9.117.245",
+              "port": 55112,
+              "users": [
+                {
+                  "id": "bcbc3411-4050-4918-a8e3-bb9e5748ea39",
+                  "encryption": "none",
+                  "security": "auto",
+                  "level": 8
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "xhttp",
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "www.cloudflare.com",
+            "publicKey": "xPIdkqak4v4kl5auXIVUXun-VfMlaOQBuftK44i4An4",
+            "shortId": "eb7f20d8fede99",
+            "spiderX": "/f7f8120b09df0e6",
+            "fingerprint": "firefox"
+          },
+          "xhttpSettings": {
+            "path": "/api/v1/sync-7f3c",
+            "mode": "stream-one"
+          }
+        }
+      },
+      {
+        "tag": "direct",
+        "protocol": "freedom"
+      },
+      {
+        "tag": "block",
+        "protocol": "blackhole"
+      }
+    ],
+    "burstObservatory": {
+      "pingConfig": {
+        "timeout": "3s",
+        "interval": "60s",
+        "sampling": 3,
+        "destination": "https://www.gstatic.com/generate_204"
+      },
+      "subjectSelector": [
+        "yt-"
+      ]
+    }
+  },
+  {
+    "remarks": "🇩🇪 Германия",
     "dns": {
       "queryStrategy": "UseIPv4",
       "servers": [
@@ -1187,7 +1395,7 @@
     }
   },
   {
-    "remarks": "Польша",
+    "remarks": "🇵🇱 Польша",
     "dns": {
       "queryStrategy": "UseIPv4",
       "servers": [
@@ -1511,7 +1719,7 @@
     }
   },
   {
-    "remarks": "Нидерланды",
+    "remarks": "🇳🇱 Нидерланды",
     "dns": {
       "queryStrategy": "UseIPv4",
       "servers": [
