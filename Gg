@@ -839,7 +839,7 @@
     }
   },
   {
-    "remarks": "🎬 YouTube • Без рекламы",
+    "remarks": "🇷🇺 RU • Ютуб без рекламы",
     "dns": {
       "queryStrategy": "UseIPv4",
       "servers": [
@@ -867,7 +867,7 @@
               "tolerance": 0.1
             }
           },
-          "fallbackTag": "yt-eu-1"
+          "fallbackTag": "yt-ru-kite"
         }
       ],
       "rules": [
@@ -1047,7 +1047,7 @@
     }
   },
   {
-    "remarks": "🇩🇪 Германия",
+    "remarks": "🇩🇪 DE • Германия",
     "dns": {
       "queryStrategy": "UseIPv4",
       "servers": [
@@ -1395,7 +1395,7 @@
     }
   },
   {
-    "remarks": "🇵🇱 Польша",
+    "remarks": "🇵🇱 PL • Польша",
     "dns": {
       "queryStrategy": "UseIPv4",
       "servers": [
@@ -1719,7 +1719,7 @@
     }
   },
   {
-    "remarks": "🇳🇱 Нидерланды",
+    "remarks": "🇳🇱 NL • Нидерланды",
     "dns": {
       "queryStrategy": "UseIPv4",
       "servers": [
